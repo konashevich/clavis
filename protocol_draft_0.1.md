@@ -1,0 +1,70 @@
+# Protocol Specification: CLAVIS
+
+**Cryptographic Linked Attestation & Verifiable Identity System**
+
+## 1. Introduction
+
+The **CLAVIS** protocol defines a platform-independent architecture for a **Holder** (the Vault application) to securely store, authorize, and transmit **Verifiable Credentials (VCs)** to **Verifiers** (external applications/websites). The protocol is designed to eliminate administrative friction and manual data entry while enforcing strict hardware-backed privacy and user sovereignty.
+
+## 2. Protocol Entities
+
+* **Holder (H):** The resident application managing the user's identity and hardware-protected keys.
+* **Verifier (V):** An external service requesting a **Verifiable Presentation (VP)**.
+* **Issuer (I):** A trusted entity (e.g., Doctor, Bank) that signs credentials.
+* **Registry (R):** A centralized or decentralized directory of Verifiers categorized by trust levels.
+* **HSM:** The device’s Secure Enclave (e.g., TEE, SE, StrongBox).
+
+## 3. The Operator Trust Hierarchy
+
+Every Verifier (\$V\$) must be identified by a **CLAVIS DID**. Upon a request, \$H\$ cross-references the \$DID\$ against the Registry to assign a Trust Category:
+
+1. **Trusted (Verified Professionals):** Licensed entities (AHPRA, AFSL, Legal) with statutory privacy obligations.
+2. **Registered (Identified Businesses):** Verified ABN/ACN holders with a declared business scope.
+3. **Non-Registered (Unverified):** Unknown entities. \$H\$ enforces "Hard Bands" on sensitive data and triggers high-friction user warnings.
+
+## 4. Data Lifecycle & Retention Contract
+
+Every **Presentation Request** from \$V\$ must include a signed **Retention Metadata** object:
+
+* **Retention Period:** Specific duration (Ephemeral, Limited, or Statutory).
+* **Purpose Binding:** A cryptographic commitment to use the data *only* for the stated purpose (e.g., "Health Check-in Only").
+* **Deletion Protocol:** Upon expiry, \$V\$ must send a signed **Certificate of Deletion** to \$H\$. Failure to do so triggers a **Retention Violation** in the global registry.
+* **Right to be Forgotten:** \$H\$ can issue a **Revocation Request**. \$V\$ must acknowledge and confirm data erasure or provide a legal justification for continued retention.
+
+## 5. Logical Dataflow
+
+### Phase I: Request & Trust Verification
+
+1. \$V\$ initiates a request with its \$DID\$, `Required_Fields`, and `Retention_Policy`.
+2. \$H\$ verifies the \$DID\$ and checks for **Domain-Data Affinity**.
+   * *Note:* If a Financial Broker requests Medical Data, \$H\$ raises an **Anomaly Flag** in the UI.
+
+### Phase II: Subject Authorization (The Hardware Gate)
+
+1. \$H\$ displays the request and the operator's trust status.
+2. The HSM releases the signing key *only* after a successful biometric/MFA trigger.
+3. For high-risk transfers to "Registered" operators, the system mandates a **Step-Up Verification** (e.g., biometric + PIN).
+
+### Phase III: Presentation & Audit
+
+1. \$H\$ generates a VP signed by the hardware-bound key \$S\_{H}\$.
+2. \$H\$ encrypts the VP using the Verifier's public key \$P\_{V}\$.
+3. **Immutable Logging:** \$H\$ records the transaction (Who, What, When, Expiry) in a local, tamper-proof audit log.
+
+## 6. Web Interaction Modes
+
+### 6.1 Standard-Compliant (SVIAP-Ready)
+
+Websites embed hidden schema metadata. The CLAVIS browser extension detects this, allowing for an automated, encrypted handshake between the site and the Vault.
+
+### 6.2 Legacy (Non-Compliant)
+
+The extension uses heuristic analysis to map fields. It presents a **Proactive Mapping Overlay** for the user to verify before data injection. Data is transmitted via standard HTTPS as a fallback, with an explicit warning regarding the lack of an encrypted CLAVIS handshake.
+
+## 7. Security Principles
+
+* **Hardware-Bound Identity:** \$S\_{H}\$ is non-exportable; identity cannot be cloned or moved to non-TEE devices.
+* **ZKP Support:** Supports proving attributes (e.g., "Over 18") without revealing raw data (DOB).
+* **Structural Privacy:** Prevents "mission creep" and unauthorized law enforcement access by binding every data packet to a specific, user-approved purpose and expiry date.
+
+*End of CLAVIS Protocol Specification*
