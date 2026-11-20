@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Secure Vault Inter-App Protocol (SVIAP)</title>
+<style>
+body { font-family: "IBM Plex Sans", "Segoe UI", sans-serif; max-width: 48rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.55; color: #1a1a1a; }
+h1,h2,h3,h4 { line-height: 1.25; }
+pre { background: #f5f5f5; padding: .85rem 1rem; overflow-x: auto; border-radius: 6px; }
+code { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: .92em; }
+.meta { color: #666; font-size: .9rem; margin-bottom: 1.5rem; }
+a { color: #1a73e8; }
+hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+.source-md { white-space: pre-wrap; background: #fafafa; border: 1px solid #e5e5e5; padding: 1rem; border-radius: 6px; font-size: .85rem; }
+.partial { background: #fff3cd; border: 1px solid #ffc107; padding: .85rem 1rem; border-radius: 8px; margin-bottom: 1.25rem; }
+</style>
+</head>
+<body>
+<p><a href="../index.html">← Back to transcript</a></p>
+<h1>Secure Vault Inter-App Protocol (SVIAP)</h1>
+<p class="meta">Extracted from Gemini batchexecute rpcid=hNvQHb for chat 32920e9e8337e92a; source=c_32920e9e8337e92a_sviap_protocol_v1.md; uuid=f6bd1c7e-285c-4d37-9f57-5fac0c06b2e9.</p>
+
+<article class="canvas-body">
+<h1>Protocol Specification: Secure Vault Inter-App Protocol (SVIAP)</h1>
+<h2>1. Introduction</h2>
+<p>The <strong>Secure Vault Inter-App Protocol (SVIAP)</strong> defines a platform-independent method for a <strong>Holder</strong> (the Vault application) to securely store, authorize, and transmit <strong>Verifiable Credentials (VCs)</strong> to <strong>Verifiers</strong> (external applications). The protocol mandates the use of a hardware-backed security module (HSM, TEE, SE, or TPM) for all cryptographic operations.</p>
+<p>---</p>
+<h2>2. Protocol Entities (DID Roles)</h2>
+<ul>
+<li><strong>Holder (H):</strong> The application managing the user&#x27;s decentralized identity and hardware-protected keys.</li>
+<li><strong>Verifier (V):</strong> An external application or service requesting a <strong>Verifiable Presentation</strong> of specific data points.</li>
+<li><strong>Issuer (I):</strong> A trusted third party (e.g., a Doctor or Bank) that has cryptographically signed a credential.</li>
+<li><strong>Hardware Security Module (HSM):</strong> The platform&#x27;s secure environment used for key generation and biometric-gated operations.</li>
+<li><strong>Subject (User):</strong> The individual to whom the credentials belong.</li>
+</ul>
+<p>---</p>
+<h2>3. Cryptographic Prerequisites</h2>
+<ol>
+<li><strong>Decentralized Identifier (DID):</strong> Each entity is identified by a unique URI (e.g., <code>did:sviap:user123</code>).</li>
+<li><strong>Holder Identity Keypair ($S_{H}, P_{H}$):</strong> Asymmetric keys stored in the HSM used to sign Verifiable Presentations.</li>
+<li><strong>Verifier Encryption Key ($P_{V}$):</strong> An ephemeral public key provided by the Verifier to secure the data transfer.</li>
+</ol>
+<p>---</p>
+<h2>4. Logical Dataflow (The VC Handshake)</h2>
+<h3>Phase I: Credential Storage</h3>
+<ol>
+<li><strong>Hardware Attestation:</strong> $H$ verifies the device has a TEE/SE.</li>
+<li><strong>Encryption:</strong> $I$ issues a signed VC. $H$ encrypts this VC using a hardware-protected master key ($K_{M}$) before saving to local storage.</li>
+</ol>
+<h3>Phase II: Presentation Request</h3>
+<ol>
+<li><strong>Discovery:</strong> $V$ sends a <strong>Presentation Request</strong> to $H$ containing:</li>
+</ol>
+<p>    * <code>Input_Descriptors</code>: Specific fields required (e.g., <code>name</code>, <code>license_number</code>).<br>
+    * <code>Verifier_DID</code>: The identity of the requester.<br>
+    * <code>Public_Key_V</code>: $P_{V}$ for the secure delivery channel.<br>
+    * <code>Nonce</code>: A challenge to ensure freshness.</p>
+<h3>Phase III: Subject Authorization</h3>
+<ol>
+<li><strong>Consent UI:</strong> $H$ resolves the <code>Verifier_DID</code> against the <strong>Trust Registry</strong> (Entry #3 in Draft Notes) and prompts the user.</li>
+<li><strong>Biometric Gate:</strong> The HSM releases the keys required to generate a Verifiable Presentation <em>only</em> upon successful biometric authentication.</li>
+</ol>
+<h3>Phase IV: Verifiable Presentation (VP) Delivery</h3>
+<ol>
+<li><strong>VP Generation:</strong> $H$ extracts the requested fields and signs them with $S_{H}$ to create a Verifiable Presentation.</li>
+<li><strong>Peer-to-Peer Encryption:</strong> $H$ re-encrypts the VP using the Verifier&#x27;s public key ($P_{V}$).</li>
+</ol>
+<p>    * $Ciphertext = Encrypt_{P_{V}}(VP + Nonce)$</p>
+<ol>
+<li><strong>Transmission:</strong> $H$ returns the encrypted VP to $V$.</li>
+</ol>
+<p>---</p>
+<h2>5. Security Principles</h2>
+<h3>5.1 Hardware-Bound Presentation</h3>
+<p>Unlike software-only wallets, the private key $S_{H}$ never leaves the TEE. A &quot;Presentation&quot; cannot be spoofed or replayed because the hardware requires a fresh biometric trigger for every unique <code>Nonce</code>.</p>
+<h3>5.2 Purpose Binding &amp; Non-Repudiation</h3>
+<p>Every VP includes a <code>Purpose_Statement</code> and an <code>Expiry_Timestamp</code>. Because the VP is signed by the Holder&#x27;s hardware-backed key, it provides an immutable record of what was shared and why.</p>
+<h3>5.3 Verifier Accountability</h3>
+<p>The <strong>Verifier</strong> must provide a valid <code>did:sviap</code> that is cross-referenced with the <strong>Operator Trust Hierarchy</strong>. Unverified DIDs trigger &quot;Non-Registered&quot; warnings (Entry #3).</p>
+<p>---<br>
+<em>End of Protocol Specification</em></p>
+</article>
+<hr>
+<details open>
+<summary>Raw source (verbatim from Gemini API)</summary>
+<pre class="source-md"># Protocol Specification: Secure Vault Inter-App Protocol (SVIAP)
+
+## 1. Introduction
+The **Secure Vault Inter-App Protocol (SVIAP)** defines a platform-independent method for a **Holder** (the Vault application) to securely store, authorize, and transmit **Verifiable Credentials (VCs)** to **Verifiers** (external applications). The protocol mandates the use of a hardware-backed security module (HSM, TEE, SE, or TPM) for all cryptographic operations.
+
+---
+
+## 2. Protocol Entities (DID Roles)
+* **Holder (H):** The application managing the user&#x27;s decentralized identity and hardware-protected keys.
+* **Verifier (V):** An external application or service requesting a **Verifiable Presentation** of specific data points.
+* **Issuer (I):** A trusted third party (e.g., a Doctor or Bank) that has cryptographically signed a credential.
+* **Hardware Security Module (HSM):** The platform&#x27;s secure environment used for key generation and biometric-gated operations.
+* **Subject (User):** The individual to whom the credentials belong.
+
+---
+
+## 3. Cryptographic Prerequisites
+1.  **Decentralized Identifier (DID):** Each entity is identified by a unique URI (e.g., `did:sviap:user123`).
+2.  **Holder Identity Keypair ($S_{H}, P_{H}$):** Asymmetric keys stored in the HSM used to sign Verifiable Presentations.
+3.  **Verifier Encryption Key ($P_{V}$):** An ephemeral public key provided by the Verifier to secure the data transfer.
+
+---
+
+## 4. Logical Dataflow (The VC Handshake)
+
+### Phase I: Credential Storage
+1.  **Hardware Attestation:** $H$ verifies the device has a TEE/SE.
+2.  **Encryption:** $I$ issues a signed VC. $H$ encrypts this VC using a hardware-protected master key ($K_{M}$) before saving to local storage.
+
+### Phase II: Presentation Request
+1.  **Discovery:** $V$ sends a **Presentation Request** to $H$ containing:
+    * `Input_Descriptors`: Specific fields required (e.g., `name`, `license_number`).
+    * `Verifier_DID`: The identity of the requester.
+    * `Public_Key_V`: $P_{V}$ for the secure delivery channel.
+    * `Nonce`: A challenge to ensure freshness.
+
+### Phase III: Subject Authorization
+1.  **Consent UI:** $H$ resolves the `Verifier_DID` against the **Trust Registry** (Entry #3 in Draft Notes) and prompts the user.
+2.  **Biometric Gate:** The HSM releases the keys required to generate a Verifiable Presentation *only* upon successful biometric authentication.
+
+### Phase IV: Verifiable Presentation (VP) Delivery
+1.  **VP Generation:** $H$ extracts the requested fields and signs them with $S_{H}$ to create a Verifiable Presentation.
+2.  **Peer-to-Peer Encryption:** $H$ re-encrypts the VP using the Verifier&#x27;s public key ($P_{V}$).
+    * $Ciphertext = Encrypt_{P_{V}}(VP + Nonce)$
+3.  **Transmission:** $H$ returns the encrypted VP to $V$.
+
+---
+
+## 5. Security Principles
+
+### 5.1 Hardware-Bound Presentation
+Unlike software-only wallets, the private key $S_{H}$ never leaves the TEE. A &quot;Presentation&quot; cannot be spoofed or replayed because the hardware requires a fresh biometric trigger for every unique `Nonce`.
+
+### 5.2 Purpose Binding &amp; Non-Repudiation
+Every VP includes a `Purpose_Statement` and an `Expiry_Timestamp`. Because the VP is signed by the Holder&#x27;s hardware-backed key, it provides an immutable record of what was shared and why.
+
+### 5.3 Verifier Accountability
+The **Verifier** must provide a valid `did:sviap` that is cross-referenced with the **Operator Trust Hierarchy**. Unverified DIDs trigger &quot;Non-Registered&quot; warnings (Entry #3).
+
+---
+*End of Protocol Specification*</pre>
+</details>
+</body>
+</html>

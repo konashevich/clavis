@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CLAVIS: Proof of Concept Roadmap (v1.1)</title>
+<style>
+body { font-family: "IBM Plex Sans", "Segoe UI", sans-serif; max-width: 48rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.55; color: #1a1a1a; }
+h1,h2,h3,h4 { line-height: 1.25; }
+pre { background: #f5f5f5; padding: .85rem 1rem; overflow-x: auto; border-radius: 6px; }
+code { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: .92em; }
+.meta { color: #666; font-size: .9rem; margin-bottom: 1.5rem; }
+a { color: #1a73e8; }
+hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+.source-md { white-space: pre-wrap; background: #fafafa; border: 1px solid #e5e5e5; padding: 1rem; border-radius: 6px; font-size: .85rem; }
+.partial { background: #fff3cd; border: 1px solid #ffc107; padding: .85rem 1rem; border-radius: 8px; margin-bottom: 1.25rem; }
+</style>
+</head>
+<body>
+<p><a href="../index.html">← Back to transcript</a></p>
+<h1>CLAVIS: Proof of Concept Roadmap (v1.1)</h1>
+<p class="meta">Extracted from Gemini batchexecute rpcid=hNvQHb for chat 32920e9e8337e92a; source=c_32920e9e8337e92a_clavis_poc_roadmap.md; uuid=e2ff597a-e56e-420a-ba35-ca16675c41a7.</p>
+
+<article class="canvas-body">
+<h1>Roadmap: Proof of Concept (PoC) для CLAVIS</h1>
+<p>Цель данного PoC — продемонстрировать, что персональные данные физически защищены аппаратным модулем (TEE) и доступны только после биометрической авторизации, используя нативные средства Android.</p>
+<h2>1. Стек технологий</h2>
+<ul>
+<li><strong>Платформа:</strong> Android (Kotlin).</li>
+<li><strong>Библиотека безопасности:</strong> Jetpack Security (Crypto).</li>
+<li><strong>Хранилище:</strong> EncryptedSharedPreferences (нативная обертка над Keystore).</li>
+<li><strong>Аутентификация:</strong> BiometricPrompt API (Class 3 / Strong).</li>
+</ul>
+<h2>2. Этапы реализации</h2>
+<h3>Этап 1: Инициализация Master Key</h3>
+<p>При первом запуске приложение создает <code>MasterKey</code> с использованием аппаратного Keystore:</p>
+<ul>
+<li>Ключ помечается как <code>setUserAuthenticationRequired(true)</code>.</li>
+<li>Добавляется флаг <code>setInvalidatedByBiometricEnrollment(true)</code> для защиты от несанкционированного добавления биометрии (Anti-Theft).</li>
+</ul>
+<h3>Этап 2: Настройка EncryptedSharedPreferences</h3>
+<p>Вместо обычных файлов используется <code>EncryptedSharedPreferences</code>. Это позволяет:</p>
+<ul>
+<li>Автоматически шифровать ключи (имена полей) с помощью <strong>AES256_SIV</strong>.</li>
+<li>Автоматически шифровать значения (данные) с помощью <strong>AES256_GCM</strong>.</li>
+<li>Использовать аппаратный ключ из Этапа 1 для прозрачного доступа к данным.</li>
+</ul>
+<h3>Этап 3: Запись персональных данных (PII)</h3>
+<ol>
+<li>Пользователь вводит тестовые данные (например, &quot;Full Name&quot;, &quot;Passport ID&quot;).</li>
+<li>Приложение сохраняет их через <code>sharedPrefs.edit().putString(...)</code>.</li>
+<li>Система автоматически запрашивает биометрию для подтверждения записи (если настроено) и шифрует данные &quot;на лету&quot; перед сохранением в XML-файл настроек.</li>
+</ol>
+<h3>Этап 4: Симуляция &quot;Запроса от Verifier&quot;</h3>
+<ol>
+<li>На главном экране кнопка &quot;Предоставить данные&quot;.</li>
+<li>Вызывается системное окно <code>BiometricPrompt</code>.</li>
+<li><strong>Результат:</strong> Только после успешного сканирования отпечатка/лица приложение получает доступ к <code>EncryptedSharedPreferences</code>, считывает данные и отображает их на экране (имитируя готовность к передаче по протоколу CLAVIS).</li>
+</ol>
+<h2>3. Преимущества этого подхода для PoC</h2>
+<ol>
+<li><strong>Нативность:</strong> Мы используем стандартные инструменты Google, что повышает доверие к безопасности решения.</li>
+<li><strong>Надежность:</strong> Исключены ошибки ручного управления векторами инициализации (IV) и солями.</li>
+<li><strong>Наглядность:</strong> Легко показать в логах, что без биометрии попытка прочитать <code>SharedPrefs</code> вызывает ошибку доступа на уровне системы.</li>
+</ol>
+<h2>4. Контрольные точки демонстрации</h2>
+<ul>
+<li>Показать, что данные &quot;забываются&quot;, если в настройках телефона изменить список отпечатков пальцев.</li>
+<li>Показать, что данные нельзя прочитать, просто скопировав файл настроек с телефона (они зашифрованы аппаратным ключом, привязанным к процессору).</li>
+</ul>
+</article>
+<hr>
+<details open>
+<summary>Raw source (verbatim from Gemini API)</summary>
+<pre class="source-md"># Roadmap: Proof of Concept (PoC) для CLAVIS
+
+Цель данного PoC — продемонстрировать, что персональные данные физически защищены аппаратным модулем (TEE) и доступны только после биометрической авторизации, используя нативные средства Android.
+
+## 1. Стек технологий
+* **Платформа:** Android (Kotlin).
+* **Библиотека безопасности:** Jetpack Security (Crypto).
+* **Хранилище:** EncryptedSharedPreferences (нативная обертка над Keystore).
+* **Аутентификация:** BiometricPrompt API (Class 3 / Strong).
+
+## 2. Этапы реализации
+
+### Этап 1: Инициализация Master Key
+При первом запуске приложение создает `MasterKey` с использованием аппаратного Keystore:
+* Ключ помечается как `setUserAuthenticationRequired(true)`.
+* Добавляется флаг `setInvalidatedByBiometricEnrollment(true)` для защиты от несанкционированного добавления биометрии (Anti-Theft).
+
+### Этап 2: Настройка EncryptedSharedPreferences
+Вместо обычных файлов используется `EncryptedSharedPreferences`. Это позволяет:
+* Автоматически шифровать ключи (имена полей) с помощью **AES256_SIV**.
+* Автоматически шифровать значения (данные) с помощью **AES256_GCM**.
+* Использовать аппаратный ключ из Этапа 1 для прозрачного доступа к данным.
+
+### Этап 3: Запись персональных данных (PII)
+1. Пользователь вводит тестовые данные (например, &quot;Full Name&quot;, &quot;Passport ID&quot;).
+2. Приложение сохраняет их через `sharedPrefs.edit().putString(...)`.
+3. Система автоматически запрашивает биометрию для подтверждения записи (если настроено) и шифрует данные &quot;на лету&quot; перед сохранением в XML-файл настроек.
+
+### Этап 4: Симуляция &quot;Запроса от Verifier&quot;
+1. На главном экране кнопка &quot;Предоставить данные&quot;.
+2. Вызывается системное окно `BiometricPrompt`.
+3. **Результат:** Только после успешного сканирования отпечатка/лица приложение получает доступ к `EncryptedSharedPreferences`, считывает данные и отображает их на экране (имитируя готовность к передаче по протоколу CLAVIS).
+
+## 3. Преимущества этого подхода для PoC
+1. **Нативность:** Мы используем стандартные инструменты Google, что повышает доверие к безопасности решения.
+2. **Надежность:** Исключены ошибки ручного управления векторами инициализации (IV) и солями.
+3. **Наглядность:** Легко показать в логах, что без биометрии попытка прочитать `SharedPrefs` вызывает ошибку доступа на уровне системы.
+
+## 4. Контрольные точки демонстрации
+* Показать, что данные &quot;забываются&quot;, если в настройках телефона изменить список отпечатков пальцев.
+* Показать, что данные нельзя прочитать, просто скопировав файл настроек с телефона (они зашифрованы аппаратным ключом, привязанным к процессору).</pre>
+</details>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Draft Notes: Secure Vault</title>
+<style>
+body { font-family: "IBM Plex Sans", "Segoe UI", sans-serif; max-width: 48rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.55; color: #1a1a1a; }
+h1,h2,h3,h4 { line-height: 1.25; }
+pre { background: #f5f5f5; padding: .85rem 1rem; overflow-x: auto; border-radius: 6px; }
+code { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: .92em; }
+.meta { color: #666; font-size: .9rem; margin-bottom: 1.5rem; }
+a { color: #1a73e8; }
+hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+.source-md { white-space: pre-wrap; background: #fafafa; border: 1px solid #e5e5e5; padding: 1rem; border-radius: 6px; font-size: .85rem; }
+.partial { background: #fff3cd; border: 1px solid #ffc107; padding: .85rem 1rem; border-radius: 8px; margin-bottom: 1.25rem; }
+</style>
+</head>
+<body>
+<p><a href="../index.html">← Back to transcript</a></p>
+<h1>Draft Notes: Secure Vault</h1>
+<p class="meta">Extracted from Gemini batchexecute rpcid=hNvQHb for chat 32920e9e8337e92a; source=c_32920e9e8337e92a_draft_notes_secure_vault.md; uuid=0e6c6107-bdc7-4af5-ba60-84e1f77303bc.</p>
+
+<article class="canvas-body">
+<h1>Draft Notes: Secure Vault Project</h1>
+<h2>Purpose Statement</h2>
+<p>This document serves as a persistent repository for evolving thoughts, architectural ideas, and preliminary concepts related to the Secure Vault project. These notes act as a &quot;scratchpad&quot; for the user to capture brainstormed ideas which may later be referenced for formal implementation within the project&#x27;s scope.</p>
+<h2>Protocol of Interaction</h2>
+<ol>
+<li><strong>Trigger:</strong> The user provides an idea, often prefaced by &quot;make a draft note&quot; or similar.</li>
+<li><strong>Processing:</strong> If the input is in a language other than English, it will be translated. The content will then be polished for technical clarity and professional formatting.</li>
+<li><strong>Recording:</strong> The refined thought will be appended to this file.</li>
+<li><strong>Reference:</strong> These notes remain dormant until the user explicitly requests to integrate a specific idea into the project&#x27;s formal specifications or protocols.</li>
+</ol>
+<p>---</p>
+<h2>📝 Draft Entries</h2>
+<h3>Entry #1: The Australian Productivity &amp; Administrative Burden Case</h3>
+<p><em>Date: March 24, 2026</em><br>
+(Content regarding form fatigue, labor productivity decline, and the $1.2B healthcare error cost.)</p>
+<h3>Entry #2: Taxonomy of Secure Data Types</h3>
+<p><em>Date: March 24, 2026</em><br>
+(Content regarding Personal, Financial, Medical, Education, Property, and Residential data categories.)</p>
+<h3>Entry #3: The Operator Trust Hierarchy &amp; Verification Registry</h3>
+<p><em>Date: March 24, 2026</em><br>
+(Content regarding Trusted, Registered, and Non-Registered operator categories.)</p>
+<h3>Entry #4: Data Retention, Expiry, &amp; Deletion Audit Protocol</h3>
+<p><em>Date: March 24, 2026</em><br>
+(Content regarding the Lifecycle Contract, Audit Logs, and the &quot;Right to be Forgotten.&quot;)</p>
+<h3>Entry #5: Web Interaction Protocol (Compliant vs. Legacy)</h3>
+<p><em>Date: March 24, 2026</em><br>
+(Content regarding SVIAP-ready websites vs. predictive filling for legacy sites.)</p>
+<h3>Entry #6: Contextual Authorization &amp; Data-Operator Matching</h3>
+<p><em>Date: March 24, 2026</em><br>
+(Content regarding domain-data affinity, anomaly flags, and multi-factor authentication for cross-domain requests.)</p>
+<h3>Entry #7: Lessons from the Pandemic – The Case for Structural Privacy</h3>
+<p><em>Date: March 24, 2026</em></p>
+<p><strong>The Problem: &quot;Emergency Quality&quot; Solutions</strong><br>
+During the COVID-19 pandemic, Australia saw the rapid rollout of digital check-in systems (QR codes) that lacked a unified architectural vision. This led to:</p>
+<ul>
+<li><strong>&quot;Surveillance Creep&quot;:</strong> Law enforcement in several states (WA, QLD, VIC) accessed health check-in data for criminal investigations, breaking public trust.</li>
+<li><strong>Third-Party Fragmentation:</strong> Businesses used unverified third-party platforms, creating unsecure &quot;honeypots&quot; of personal data.</li>
+<li><strong>Legal Instability:</strong> Regulations were often changed by ministerial decree rather than primary legislation.</li>
+</ul>
+<p><strong>The Solution: SVIAP as a Universal Registration Protocol</strong></p>
+<ul>
+<li><strong>Privacy-by-Design:</strong> The Vault provides &quot;Ephemeral Handshakes&quot; rather than plaintext uploads.</li>
+<li><strong>Immutable Purpose Binding:</strong> The protocol cryptographically binds data to a specific purpose (e.g., &quot;Health Check-in Only&quot;), preventing mission creep.</li>
+<li><strong>Verification Over Collection:</strong> Allows a &quot;Green Tick&quot; status check without the venue needing to see or store the user&#x27;s name/phone.</li>
+</ul>
+<h3>Entry #8: Integration with W3C DID &amp; Verifiable Credentials (VC)</h3>
+<p><em>Date: March 24, 2026</em></p>
+<p>The SVIAP protocol should be viewed as a high-security implementation of the <strong>W3C Decentralized Identity (DID)</strong> and <strong>Verifiable Credentials (VC)</strong> standards.</p>
+<p><strong>1. The &quot;Trust Triangle&quot; Mapping:</strong></p>
+<ul>
+<li><strong>Issuer:</strong> The licensed professionals (Entry #3) who sign the data (e.g., a Doctor signing a medical record).</li>
+<li><strong>Holder:</strong> The Secure Vault App, which stores the encrypted VC.</li>
+<li><strong>Verifier:</strong> The &quot;Consumer&quot; app requesting the data.</li>
+</ul>
+<p><strong>2. Hardware-Enforced Credentials:</strong><br>
+While standard VCs are often software-managed, SVIAP mandates that the private keys used to &quot;Present&quot; a credential are locked in the <strong>Hardware Keystore (TEE/SE)</strong>. This creates a &quot;Hardware-Bound Presentation,&quot; ensuring the identity cannot be cloned even if the phone&#x27;s OS is compromised.</p>
+<p><strong>3. Interoperability:</strong><br>
+By aligning with the DID/VC standards, the Secure Vault can theoretically accept credentials from any international issuer (e.g., an EU Digital Identity Wallet) while adding a superior layer of hardware-backed authorization.</p>
+<p>---</p>
+</article>
+<hr>
+<details open>
+<summary>Raw source (verbatim from Gemini API)</summary>
+<pre class="source-md"># Draft Notes: Secure Vault Project
+
+## Purpose Statement
+This document serves as a persistent repository for evolving thoughts, architectural ideas, and preliminary concepts related to the Secure Vault project. These notes act as a &quot;scratchpad&quot; for the user to capture brainstormed ideas which may later be referenced for formal implementation within the project&#x27;s scope.
+
+## Protocol of Interaction
+1.  **Trigger:** The user provides an idea, often prefaced by &quot;make a draft note&quot; or similar.
+2.  **Processing:** If the input is in a language other than English, it will be translated. The content will then be polished for technical clarity and professional formatting.
+3.  **Recording:** The refined thought will be appended to this file.
+4.  **Reference:** These notes remain dormant until the user explicitly requests to integrate a specific idea into the project&#x27;s formal specifications or protocols.
+
+---
+
+## 📝 Draft Entries
+
+### Entry #1: The Australian Productivity &amp; Administrative Burden Case
+*Date: March 24, 2026*
+(Content regarding form fatigue, labor productivity decline, and the $1.2B healthcare error cost.)
+
+### Entry #2: Taxonomy of Secure Data Types
+*Date: March 24, 2026*
+(Content regarding Personal, Financial, Medical, Education, Property, and Residential data categories.)
+
+### Entry #3: The Operator Trust Hierarchy &amp; Verification Registry
+*Date: March 24, 2026*
+(Content regarding Trusted, Registered, and Non-Registered operator categories.)
+
+### Entry #4: Data Retention, Expiry, &amp; Deletion Audit Protocol
+*Date: March 24, 2026*
+(Content regarding the Lifecycle Contract, Audit Logs, and the &quot;Right to be Forgotten.&quot;)
+
+### Entry #5: Web Interaction Protocol (Compliant vs. Legacy)
+*Date: March 24, 2026*
+(Content regarding SVIAP-ready websites vs. predictive filling for legacy sites.)
+
+### Entry #6: Contextual Authorization &amp; Data-Operator Matching
+*Date: March 24, 2026*
+(Content regarding domain-data affinity, anomaly flags, and multi-factor authentication for cross-domain requests.)
+
+### Entry #7: Lessons from the Pandemic – The Case for Structural Privacy
+*Date: March 24, 2026*
+
+**The Problem: &quot;Emergency Quality&quot; Solutions**
+During the COVID-19 pandemic, Australia saw the rapid rollout of digital check-in systems (QR codes) that lacked a unified architectural vision. This led to:
+* **&quot;Surveillance Creep&quot;:** Law enforcement in several states (WA, QLD, VIC) accessed health check-in data for criminal investigations, breaking public trust.
+* **Third-Party Fragmentation:** Businesses used unverified third-party platforms, creating unsecure &quot;honeypots&quot; of personal data.
+* **Legal Instability:** Regulations were often changed by ministerial decree rather than primary legislation.
+
+**The Solution: SVIAP as a Universal Registration Protocol**
+* **Privacy-by-Design:** The Vault provides &quot;Ephemeral Handshakes&quot; rather than plaintext uploads.
+* **Immutable Purpose Binding:** The protocol cryptographically binds data to a specific purpose (e.g., &quot;Health Check-in Only&quot;), preventing mission creep.
+* **Verification Over Collection:** Allows a &quot;Green Tick&quot; status check without the venue needing to see or store the user&#x27;s name/phone.
+
+### Entry #8: Integration with W3C DID &amp; Verifiable Credentials (VC)
+*Date: March 24, 2026*
+
+The SVIAP protocol should be viewed as a high-security implementation of the **W3C Decentralized Identity (DID)** and **Verifiable Credentials (VC)** standards.
+
+**1. The &quot;Trust Triangle&quot; Mapping:**
+* **Issuer:** The licensed professionals (Entry #3) who sign the data (e.g., a Doctor signing a medical record).
+* **Holder:** The Secure Vault App, which stores the encrypted VC.
+* **Verifier:** The &quot;Consumer&quot; app requesting the data.
+
+**2. Hardware-Enforced Credentials:**
+While standard VCs are often software-managed, SVIAP mandates that the private keys used to &quot;Present&quot; a credential are locked in the **Hardware Keystore (TEE/SE)**. This creates a &quot;Hardware-Bound Presentation,&quot; ensuring the identity cannot be cloned even if the phone&#x27;s OS is compromised.
+
+**3. Interoperability:**
+By aligning with the DID/VC standards, the Secure Vault can theoretically accept credentials from any international issuer (e.g., an EU Digital Identity Wallet) while adding a superior layer of hardware-backed authorization.
+
+---</pre>
+</details>
+</body>
+</html>

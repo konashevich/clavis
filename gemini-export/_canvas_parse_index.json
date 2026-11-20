@@ -1,0 +1,27 @@
+{
+  "captured": [
+    [
+      "CLAVIS Protocol Specification",
+      "clavis-protocol-specification.html",
+      692600,
+      1776894
+    ]
+  ],
+  "missing": [
+    "Secure Android Data Vault Specification",
+    "Secure Vault Inter-App Protocol (SVIAP)",
+    "Draft Notes: Secure Vault",
+    "Market Review: Secure Vault Project",
+    "CLAVIS: Proof of Concept Roadmap (v1.1)",
+    "Draft Notes: CLAVIS Project",
+    "CLAVIS: Minimal PoC Scope (Medical)",
+    "CLAVIS: Medical Credential Example"
+  ],
+  "discovered": {
+    "CLAVIS Protocol Specification": {
+      "fname": "c_32920e9e8337e92a_clavis_protocol_v1.md",
+      "uuid": "5024d63b-70bf-434e-b00c-0507faaa7bd0",
+      "md_len": 692600
+    }
+  }
+}

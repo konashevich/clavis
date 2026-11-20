@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Market Review: Secure Vault Project</title>
+<style>
+body { font-family: "IBM Plex Sans", "Segoe UI", sans-serif; max-width: 48rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.55; color: #1a1a1a; }
+h1,h2,h3,h4 { line-height: 1.25; }
+pre { background: #f5f5f5; padding: .85rem 1rem; overflow-x: auto; border-radius: 6px; }
+code { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: .92em; }
+.meta { color: #666; font-size: .9rem; margin-bottom: 1.5rem; }
+a { color: #1a73e8; }
+hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+.source-md { white-space: pre-wrap; background: #fafafa; border: 1px solid #e5e5e5; padding: 1rem; border-radius: 6px; font-size: .85rem; }
+.partial { background: #fff3cd; border: 1px solid #ffc107; padding: .85rem 1rem; border-radius: 8px; margin-bottom: 1.25rem; }
+</style>
+</head>
+<body>
+<p><a href="../index.html">← Back to transcript</a></p>
+<h1>Market Review: Secure Vault Project</h1>
+<p class="meta">Extracted from Gemini batchexecute rpcid=hNvQHb for chat 32920e9e8337e92a; source=c_32920e9e8337e92a_market_review_secure_vault.md; uuid=82ae9083-1ab4-4b6f-955d-39a49588899b.</p>
+
+<article class="canvas-body">
+<h1>Market Review: Secure Data Vault Solutions</h1>
+<h2>1. Current Landscape Overview</h2>
+<p>As of current market analysis, there is no single &quot;universal&quot; application that functions as a general-purpose, hardware-locked broker for third-party data requests. The market is fragmented into three primary categories, each implementing specific components of the proposed Secure Vault logic.</p>
+<h2>2. Competitive Analysis</h2>
+<h3>2.1 Digital Identity Wallets (The &quot;Protocol&quot; Precursor)</h3>
+<ul>
+<li><strong>Examples:</strong> European Digital Identity Wallet (EUDI), Samsung Wallet, Apple Wallet IDs.</li>
+<li><strong>Storage Logic (Correction):</strong> These apps do <strong>not</strong> store the bulk identity data <em>inside</em> the TEE.</li>
+</ul>
+<p>    * <strong>TEE/Secure Element:</strong> Stores the <strong>private cryptographic keys</strong> and handles the biometric matching logic.<br>
+    * <strong>Encrypted Storage:</strong> The actual identity data (name, DOB, passport number) is stored in the app&#x27;s private, encrypted database on the standard flash storage, but the <strong>decryption key</strong> is locked inside the TEE.</p>
+<ul>
+<li><strong>Gaps:</strong> Restricted to official government-issued documents. They do not support user-defined &quot;custom&quot; records (e.g., private lease agreements or specific medical notes) for general third-party application use.</li>
+</ul>
+<h3>2.2 Hardware-Backed Password Managers (The &quot;Storage&quot; Precursor)</h3>
+<ul>
+<li><strong>Examples:</strong> Bitwarden, 1Password, SecureX.</li>
+<li><strong>Strengths:</strong> Excellent use of HSMs to protect the &quot;Master Key.&quot;</li>
+<li><strong>Gaps:</strong> Primarily use &quot;Push&quot; technology (Autofill). They lack a secure bidirectional handshake protocol where data is re-encrypted specifically for a recipient&#x27;s public key before transmission.</li>
+</ul>
+<h3>2.3 Platform Credential Managers (The &quot;Auth&quot; Precursor)</h3>
+<ul>
+<li><strong>Examples:</strong> Android Credential Manager, Apple Passkeys.</li>
+<li><strong>Strengths:</strong> Uses hardware-backed keys to sign challenges for app logins.</li>
+<li><strong>Gaps:</strong> Focus strictly on <em>authentication</em> (identity verification) rather than <em>data exchange</em> (sharing specific encrypted records).</li>
+</ul>
+<h2>3. The &quot;Missing Link&quot;: Why it doesn&#x27;t exist yet</h2>
+<p>Several barriers have prevented the emergence of a universal vault:</p>
+<ol>
+<li><strong>Trust Gap:</strong> Consumer apps need &quot;Remote Attestation&quot; to prove the Vault is genuine.</li>
+<li><strong>App Sandboxing:</strong> OS designs restrict Inter-Process Communication (IPC), making standardized data exchange difficult without a custom protocol.</li>
+<li><strong>Walled Gardens:</strong> Platform holders (Google/Apple) prefer to act as the primary identity providers, limiting third-party &quot;Identity Brokers&quot; from accessing native biometric hooks for external apps.</li>
+</ol>
+<h2>4. Market Opportunity: The Universal Data Broker</h2>
+<p>The proposed specification describes a <strong>Self-Sovereign Identity (SSI) Agent</strong>. The unique opportunity lies in:</p>
+<ul>
+<li><strong>SVIAP Protocol:</strong> Standardizing how any app requests data securely.</li>
+<li><strong>Data Sovereignty:</strong> Moving beyond login credentials to allow users to own and share structured, encrypted personal data.</li>
+<li><strong>Privacy-by-Design:</strong> Ensuring that even the host OS cannot intercept the plaintext data during the exchange between the Vault and the Consumer.</li>
+</ul>
+<p>---<br>
+<em>End of Market Review</em></p>
+</article>
+<hr>
+<details open>
+<summary>Raw source (verbatim from Gemini API)</summary>
+<pre class="source-md"># Market Review: Secure Data Vault Solutions
+
+## 1. Current Landscape Overview
+As of current market analysis, there is no single &quot;universal&quot; application that functions as a general-purpose, hardware-locked broker for third-party data requests. The market is fragmented into three primary categories, each implementing specific components of the proposed Secure Vault logic.
+
+## 2. Competitive Analysis
+
+### 2.1 Digital Identity Wallets (The &quot;Protocol&quot; Precursor)
+* **Examples:** European Digital Identity Wallet (EUDI), Samsung Wallet, Apple Wallet IDs.
+* **Storage Logic (Correction):** These apps do **not** store the bulk identity data *inside* the TEE.
+    * **TEE/Secure Element:** Stores the **private cryptographic keys** and handles the biometric matching logic.
+    * **Encrypted Storage:** The actual identity data (name, DOB, passport number) is stored in the app&#x27;s private, encrypted database on the standard flash storage, but the **decryption key** is locked inside the TEE.
+* **Gaps:** Restricted to official government-issued documents. They do not support user-defined &quot;custom&quot; records (e.g., private lease agreements or specific medical notes) for general third-party application use.
+
+### 2.2 Hardware-Backed Password Managers (The &quot;Storage&quot; Precursor)
+* **Examples:** Bitwarden, 1Password, SecureX.
+* **Strengths:** Excellent use of HSMs to protect the &quot;Master Key.&quot;
+* **Gaps:** Primarily use &quot;Push&quot; technology (Autofill). They lack a secure bidirectional handshake protocol where data is re-encrypted specifically for a recipient&#x27;s public key before transmission.
+
+### 2.3 Platform Credential Managers (The &quot;Auth&quot; Precursor)
+* **Examples:** Android Credential Manager, Apple Passkeys.
+* **Strengths:** Uses hardware-backed keys to sign challenges for app logins.
+* **Gaps:** Focus strictly on *authentication* (identity verification) rather than *data exchange* (sharing specific encrypted records).
+
+## 3. The &quot;Missing Link&quot;: Why it doesn&#x27;t exist yet
+Several barriers have prevented the emergence of a universal vault:
+1.  **Trust Gap:** Consumer apps need &quot;Remote Attestation&quot; to prove the Vault is genuine.
+2.  **App Sandboxing:** OS designs restrict Inter-Process Communication (IPC), making standardized data exchange difficult without a custom protocol.
+3.  **Walled Gardens:** Platform holders (Google/Apple) prefer to act as the primary identity providers, limiting third-party &quot;Identity Brokers&quot; from accessing native biometric hooks for external apps.
+
+## 4. Market Opportunity: The Universal Data Broker
+The proposed specification describes a **Self-Sovereign Identity (SSI) Agent**. The unique opportunity lies in:
+* **SVIAP Protocol:** Standardizing how any app requests data securely.
+* **Data Sovereignty:** Moving beyond login credentials to allow users to own and share structured, encrypted personal data.
+* **Privacy-by-Design:** Ensuring that even the host OS cannot intercept the plaintext data during the exchange between the Vault and the Consumer.
+
+---
+*End of Market Review*</pre>
+</details>
+</body>
+</html>

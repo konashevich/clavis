@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CLAVIS Protocol Specification</title>
+<style>
+body { font-family: "IBM Plex Sans", "Segoe UI", sans-serif; max-width: 48rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.55; color: #1a1a1a; }
+h1,h2,h3,h4 { line-height: 1.25; }
+.meta { color: #666; font-size: .9rem; margin-bottom: 1.5rem; }
+a { color: #1a73e8; }
+hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+.source-md { white-space: pre-wrap; background: #fafafa; border: 1px solid #e5e5e5; padding: 1rem; border-radius: 6px; font-size: .85rem; }
+.partial { background: #fff3cd; border: 1px solid #ffc107; padding: .85rem 1rem; border-radius: 8px; margin-bottom: 1.25rem; }
+</style>
+</head>
+<body>
+<p><a href="../index.html">← Back to transcript</a></p>
+<h1>CLAVIS Protocol Specification</h1>
+<p class="meta">Verbatim from Gemini Canvas editor (Previous-version walk to full baseline). Chat 32920e9e8337e92a; uuid 5024d63b-70bf-434e-b00c-0507faaa7bd0.</p>
+
+<article class="canvas-body">
+<h1>Protocol Specification: CLAVIS</h1>
+<p>Cryptographic Linked Attestation &amp; Verifiable Identity System</p>
+<h2>1. Introduction</h2>
+<p>The CLAVIS protocol defines a platform-independent architecture for a Holder (the Vault application) to securely store, authorize, and transmit Verifiable Credentials (VCs) to Verifiers (external applications/websites). The protocol is designed to eliminate administrative friction and manual data entry while enforcing strict hardware-backed privacy and user sovereignty.</p>
+<h2>2. Protocol Entities</h2>
+<p>Holder (H): The resident application managing the user&#x27;s identity and hardware-protected keys.</p>
+<p>Verifier (V): An external service requesting a Verifiable Presentation (VP).</p>
+<p>Issuer (I): A trusted entity (e.g., Doctor, Bank) that signs credentials.</p>
+<p>Registry (R): A centralized or decentralized directory of Verifiers categorized by trust levels.</p>
+<p>HSM: The device’s Secure Enclave (e.g., TEE, SE, StrongBox).</p>
+<h2>3. The Operator Trust Hierarchy</h2>
+<p>Every Verifier (V) must be identified by a CLAVIS DID. Upon a request, H cross-references the DID against the Registry to assign a Trust Category:</p>
+<p>Trusted (Verified Professionals): Licensed entities (AHPRA, AFSL, Legal) with statutory privacy obligations.</p>
+<p>Registered (Identified Businesses): Verified ABN/ACN holders with a declared business scope.</p>
+<p>Non-Registered (Unverified): Unknown entities. H enforces &quot;Hard Bands&quot; on sensitive data and triggers high-friction user warnings.</p>
+<h2>4. Data Lifecycle &amp; Retention Contract</h2>
+<p>Every Presentation Request from V must include a signed Retention Metadata object:</p>
+<p>Retention Period: Specific duration (Ephemeral, Limited, or Statutory).</p>
+<p>Purpose Binding: A cryptographic commitment to use the data only for the stated purpose (e.g., &quot;Health Check-in Only&quot;).</p>
+<p>Deletion Protocol: Upon expiry, V must send a signed Certificate of Deletion to H. Failure to do so triggers a Retention Violation in the global registry.</p>
+<p>Right to be Forgotten: H can issue a Revocation Request. V must acknowledge and confirm data erasure or provide a legal justification for continued retention.</p>
+<h2>5. Logical Dataflow</h2>
+<p>Phase I: Request &amp; Trust Verification</p>
+<p>V initiates a request with its DID, Required_Fields, and Retention_Policy.</p>
+<p>H verifies the DID and checks for Domain-Data Affinity.</p>
+<p>Note: If a Financial Broker requests Medical Data, H raises an Anomaly Flag in the UI.</p>
+<h3>Phase II: Subject Authorization (The Hardware Gate)</h3>
+<p>H displays the request and the operator&#x27;s trust status.</p>
+<p>The HSM releases the signing key only after a successful biometric/MFA trigger.</p>
+<p>For high-risk transfers to &quot;Registered&quot; operators, the system mandates a Step-Up Verification (e.g., biometric + PIN).</p>
+<h3>Phase III: Presentation &amp; Audit</h3>
+<p>H generates a VP signed by the hardware-bound key S<br>
+H<br>
+	​</p>
+<p>.</p>
+<p>H encrypts the VP using the Verifier&#x27;s public key P<br>
+V<br>
+	​</p>
+<p>.</p>
+<p>Immutable Logging: H records the transaction (Who, What, When, Expiry) in a local, tamper-proof audit log.</p>
+<h2>6. Web Interaction Modes</h2>
+<p>6.1 Standard-Compliant (SVIAP-Ready)</p>
+<p>Websites embed hidden schema metadata. The CLAVIS browser extension detects this, allowing for an automated, encrypted handshake between the site and the Vault.</p>
+<h3>6.2 Legacy (Non-Compliant)</h3>
+<p>The extension uses heuristic analysis to map fields. It presents a Proactive Mapping Overlay for the user to verify before data injection. Data is transmitted via standard HTTPS as a fallback, with an explicit warning regarding the lack of an encrypted CLAVIS handshake.</p>
+<h2>7. Security Principles</h2>
+<p>Hardware-Bound Identity: S<br>
+H<br>
+	​</p>
+<p>is non-exportable; identity cannot be cloned or moved to non-TEE devices.</p>
+<p>ZKP Support: Supports proving attributes (e.g., &quot;Over 18&quot;) without revealing raw data (DOB).</p>
+<p>Structural Privacy: Prevents &quot;mission creep&quot; and unauthorized law enforcement access by binding every data packet to a specific, user-approved purpose and expiry date.</p>
+<p>End of CLAVIS Protocol Specification</p>
+</article>
+<hr>
+<details open>
+<summary>Raw source (verbatim)</summary>
+<pre class="source-md">Protocol Specification: CLAVIS
+
+Cryptographic Linked Attestation &amp; Verifiable Identity System
+
+1. Introduction
+
+The CLAVIS protocol defines a platform-independent architecture for a Holder (the Vault application) to securely store, authorize, and transmit Verifiable Credentials (VCs) to Verifiers (external applications/websites). The protocol is designed to eliminate administrative friction and manual data entry while enforcing strict hardware-backed privacy and user sovereignty.
+
+2. Protocol Entities
+
+Holder (H): The resident application managing the user&#x27;s identity and hardware-protected keys.
+
+Verifier (V): An external service requesting a Verifiable Presentation (VP).
+
+Issuer (I): A trusted entity (e.g., Doctor, Bank) that signs credentials.
+
+Registry (R): A centralized or decentralized directory of Verifiers categorized by trust levels.
+
+HSM: The device’s Secure Enclave (e.g., TEE, SE, StrongBox).
+
+3. The Operator Trust Hierarchy
+
+Every Verifier (V) must be identified by a CLAVIS DID. Upon a request, H cross-references the DID against the Registry to assign a Trust Category:
+
+Trusted (Verified Professionals): Licensed entities (AHPRA, AFSL, Legal) with statutory privacy obligations.
+
+Registered (Identified Businesses): Verified ABN/ACN holders with a declared business scope.
+
+Non-Registered (Unverified): Unknown entities. H enforces &quot;Hard Bands&quot; on sensitive data and triggers high-friction user warnings.
+
+4. Data Lifecycle &amp; Retention Contract
+
+Every Presentation Request from V must include a signed Retention Metadata object:
+
+Retention Period: Specific duration (Ephemeral, Limited, or Statutory).
+
+Purpose Binding: A cryptographic commitment to use the data only for the stated purpose (e.g., &quot;Health Check-in Only&quot;).
+
+Deletion Protocol: Upon expiry, V must send a signed Certificate of Deletion to H. Failure to do so triggers a Retention Violation in the global registry.
+
+Right to be Forgotten: H can issue a Revocation Request. V must acknowledge and confirm data erasure or provide a legal justification for continued retention.
+
+5. Logical Dataflow
+Phase I: Request &amp; Trust Verification
+
+V initiates a request with its DID, Required_Fields, and Retention_Policy.
+
+H verifies the DID and checks for Domain-Data Affinity.
+
+Note: If a Financial Broker requests Medical Data, H raises an Anomaly Flag in the UI.
+
+Phase II: Subject Authorization (The Hardware Gate)
+
+H displays the request and the operator&#x27;s trust status.
+
+The HSM releases the signing key only after a successful biometric/MFA trigger.
+
+For high-risk transfers to &quot;Registered&quot; operators, the system mandates a Step-Up Verification (e.g., biometric + PIN).
+
+Phase III: Presentation &amp; Audit
+
+H generates a VP signed by the hardware-bound key S
+H
+	​
+
+.
+
+H encrypts the VP using the Verifier&#x27;s public key P
+V
+	​
+
+.
+
+Immutable Logging: H records the transaction (Who, What, When, Expiry) in a local, tamper-proof audit log.
+
+6. Web Interaction Modes
+6.1 Standard-Compliant (SVIAP-Ready)
+
+Websites embed hidden schema metadata. The CLAVIS browser extension detects this, allowing for an automated, encrypted handshake between the site and the Vault.
+
+6.2 Legacy (Non-Compliant)
+
+The extension uses heuristic analysis to map fields. It presents a Proactive Mapping Overlay for the user to verify before data injection. Data is transmitted via standard HTTPS as a fallback, with an explicit warning regarding the lack of an encrypted CLAVIS handshake.
+
+7. Security Principles
+
+Hardware-Bound Identity: S
+H
+	​
+
+ is non-exportable; identity cannot be cloned or moved to non-TEE devices.
+
+ZKP Support: Supports proving attributes (e.g., &quot;Over 18&quot;) without revealing raw data (DOB).
+
+Structural Privacy: Prevents &quot;mission creep&quot; and unauthorized law enforcement access by binding every data packet to a specific, user-approved purpose and expiry date.
+
+End of CLAVIS Protocol Specification</pre>
+</details>
+</body>
+</html>

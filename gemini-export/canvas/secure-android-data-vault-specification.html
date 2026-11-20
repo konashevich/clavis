@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Secure Android Data Vault Specification</title>
+<style>
+body { font-family: "IBM Plex Sans", "Segoe UI", sans-serif; max-width: 48rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.55; color: #1a1a1a; }
+h1,h2,h3,h4 { line-height: 1.25; }
+pre { background: #f5f5f5; padding: .85rem 1rem; overflow-x: auto; border-radius: 6px; }
+code { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: .92em; }
+.meta { color: #666; font-size: .9rem; margin-bottom: 1.5rem; }
+a { color: #1a73e8; }
+hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+.source-md { white-space: pre-wrap; background: #fafafa; border: 1px solid #e5e5e5; padding: 1rem; border-radius: 6px; font-size: .85rem; }
+.partial { background: #fff3cd; border: 1px solid #ffc107; padding: .85rem 1rem; border-radius: 8px; margin-bottom: 1.25rem; }
+</style>
+</head>
+<body>
+<p><a href="../index.html">← Back to transcript</a></p>
+<h1>Secure Android Data Vault Specification</h1>
+<p class="meta">Extracted from Gemini batchexecute rpcid=hNvQHb for chat 32920e9e8337e92a; source=c_32920e9e8337e92a_specification_secure_data_vault.md; uuid=1de21d84-c395-45b4-b474-9c9444487a57.</p>
+
+<article class="canvas-body">
+<h1>Technical Specification: Secure Android Data Vault</h1>
+<h2>1. Overview</h2>
+<p>This specification outlines the architecture and requirements for an Android application designed to serve as a high-security personal data vault. The application leverages hardware-backed security (Android Keystore) to store sensitive user information and provides a secure mechanism for sharing this data with authorized third-party applications only upon explicit user consent.</p>
+<h2>2. Core Requirements</h2>
+<h3>2.1 Hardware-Backed Security (Android Keystore)</h3>
+<ul>
+<li><strong>Mandatory Hardware Attestation:</strong> The application must strictly require a Trusted Execution Environment (TEE) or a Secure Element (StrongBox).</li>
+<li><strong>Device Compatibility Check:</strong> Upon launch, the app must verify the presence of hardware-backed key storage. If the device only supports software-based encryption, the application must terminate and notify the user that the device is unsupported for security reasons.</li>
+</ul>
+<h3>2.2 Encrypted Personal Data Storage</h3>
+<ul>
+<li><strong>Data Types:</strong> Sensitive information includes, but is not limited to, passport details, medical records, and financial identifiers.</li>
+<li><strong>Encryption Standard:</strong> All data must be stored in an encrypted format using industry-standard protocols (e.g., AES-GCM).</li>
+<li><strong>Key Isolation:</strong> Encryption keys must be generated and stored within the Android Keystore. Private keys must be flagged as &quot;non-exportable,&quot; ensuring they never leave the hardware-protected environment.</li>
+<li><strong>Decryption Logic:</strong> Decryption of stored data occurs only within the application&#x27;s memory during an authorized session.</li>
+</ul>
+<h3>2.3 User Authorization &amp; Authentication</h3>
+<ul>
+<li><strong>Explicit Consent:</strong> Access requests from external applications must trigger a system-level authorization prompt.</li>
+<li><strong>Authentication Methods:</strong> The user must authorize each request using:</li>
+</ul>
+<p>    * Biometric Authentication (Fingerprint, Face Unlock via Class 3/Strong Biometrics).<br>
+    * Device PIN/Password.</p>
+<ul>
+<li><strong>Multi-Factor Authentication (MFA):</strong> The system should support optional MFA configurations, requiring both biometrics and a PIN for high-sensitivity data access.</li>
+</ul>
+<h3>2.4 Secure Inter-App Data Transfer</h3>
+<ul>
+<li><strong>No Plaintext Exposure:</strong> Data must never be passed between applications in an unencrypted state.</li>
+<li><strong>Recipient-Specific Encryption:</strong> Once a request is authorized, the Vault application encrypts the requested data using the public key provided by the requesting (third-party) application.</li>
+<li><strong>End-to-End Security:</strong> Only the specific requesting application, possessing the corresponding private key, will be able to decrypt and utilize the transferred data.</li>
+</ul>
+<h3>2.5 Protection Against Mass Data Extraction</h3>
+<ul>
+<li><strong>Rate Limiting:</strong> Implement strict controls on the volume of data that can be exported in a single session or timeframe.</li>
+<li><strong>Individual Authorization:</strong> Every discrete data point or record request requires its own explicit user confirmation to prevent automated &quot;bulk&quot; harvesting of personal information.</li>
+<li><strong>Time Intervals:</strong> Optional &quot;cooldown&quot; periods between sensitive data exports to mitigate the risk of forced or accidental mass exposure.</li>
+</ul>
+<h2>3. Operational Workflow</h2>
+<ol>
+<li><strong>Key Initialization:</strong> Upon the first run, the application generates master encryption keys within the hardware Keystore.</li>
+<li><strong>Data Ingestion:</strong> User inputs personal data; the app encrypts it using the master keys and saves it to local persistent storage.</li>
+<li><strong>Inbound Request:</strong> A third-party app requests specific data fields.</li>
+<li><strong>Authorization:</strong> The Vault app interrupts the process, prompting the user for biometric or PIN confirmation.</li>
+<li><strong>Secure Packaging:</strong> After successful authentication, the Vault app fetches the data, decrypts it internally, then re-encrypts it using the recipient&#x27;s public key.</li>
+<li><strong>Transmission:</strong> The encrypted payload is sent to the requesting app.</li>
+<li><strong>Final Decryption:</strong> The recipient application uses its internal private key to access the data.</li>
+</ol>
+<p>---<br>
+<em>End of Specification</em></p>
+</article>
+<hr>
+<details open>
+<summary>Raw source (verbatim from Gemini API)</summary>
+<pre class="source-md"># Technical Specification: Secure Android Data Vault
+
+## 1. Overview
+This specification outlines the architecture and requirements for an Android application designed to serve as a high-security personal data vault. The application leverages hardware-backed security (Android Keystore) to store sensitive user information and provides a secure mechanism for sharing this data with authorized third-party applications only upon explicit user consent.
+
+## 2. Core Requirements
+
+### 2.1 Hardware-Backed Security (Android Keystore)
+* **Mandatory Hardware Attestation:** The application must strictly require a Trusted Execution Environment (TEE) or a Secure Element (StrongBox).
+* **Device Compatibility Check:** Upon launch, the app must verify the presence of hardware-backed key storage. If the device only supports software-based encryption, the application must terminate and notify the user that the device is unsupported for security reasons.
+
+### 2.2 Encrypted Personal Data Storage
+* **Data Types:** Sensitive information includes, but is not limited to, passport details, medical records, and financial identifiers.
+* **Encryption Standard:** All data must be stored in an encrypted format using industry-standard protocols (e.g., AES-GCM).
+* **Key Isolation:** Encryption keys must be generated and stored within the Android Keystore. Private keys must be flagged as &quot;non-exportable,&quot; ensuring they never leave the hardware-protected environment.
+* **Decryption Logic:** Decryption of stored data occurs only within the application&#x27;s memory during an authorized session.
+
+### 2.3 User Authorization &amp; Authentication
+* **Explicit Consent:** Access requests from external applications must trigger a system-level authorization prompt.
+* **Authentication Methods:** The user must authorize each request using:
+    * Biometric Authentication (Fingerprint, Face Unlock via Class 3/Strong Biometrics).
+    * Device PIN/Password.
+* **Multi-Factor Authentication (MFA):** The system should support optional MFA configurations, requiring both biometrics and a PIN for high-sensitivity data access.
+
+### 2.4 Secure Inter-App Data Transfer
+* **No Plaintext Exposure:** Data must never be passed between applications in an unencrypted state.
+* **Recipient-Specific Encryption:** Once a request is authorized, the Vault application encrypts the requested data using the public key provided by the requesting (third-party) application.
+* **End-to-End Security:** Only the specific requesting application, possessing the corresponding private key, will be able to decrypt and utilize the transferred data.
+
+### 2.5 Protection Against Mass Data Extraction
+* **Rate Limiting:** Implement strict controls on the volume of data that can be exported in a single session or timeframe.
+* **Individual Authorization:** Every discrete data point or record request requires its own explicit user confirmation to prevent automated &quot;bulk&quot; harvesting of personal information.
+* **Time Intervals:** Optional &quot;cooldown&quot; periods between sensitive data exports to mitigate the risk of forced or accidental mass exposure.
+
+## 3. Operational Workflow
+
+1.  **Key Initialization:** Upon the first run, the application generates master encryption keys within the hardware Keystore.
+2.  **Data Ingestion:** User inputs personal data; the app encrypts it using the master keys and saves it to local persistent storage.
+3.  **Inbound Request:** A third-party app requests specific data fields.
+4.  **Authorization:** The Vault app interrupts the process, prompting the user for biometric or PIN confirmation.
+5.  **Secure Packaging:** After successful authentication, the Vault app fetches the data, decrypts it internally, then re-encrypts it using the recipient&#x27;s public key.
+6.  **Transmission:** The encrypted payload is sent to the requesting app.
+7.  **Final Decryption:** The recipient application uses its internal private key to access the data.
+
+---
+*End of Specification*</pre>
+</details>
+</body>
+</html>

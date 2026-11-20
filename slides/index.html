@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLAVIS — Cryptographic Linked Attestation &amp; Verifiable Identity System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Public+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- 1. Title -->
+    <div class="slide-container" id="s01-title" data-short-title="Title">
+        <div class="title-layout">
+            <span class="badge">Protocol · Holder Vault · Hardware-Gated Consent</span>
+            <div class="hero-title">
+                <span class="hero-primary">CLAVIS</span>
+                <span class="hero-expand">Cryptographic Linked Attestation &amp; Verifiable Identity System</span>
+                <span class="hero-secondary">Your credentials stay on your device.<br>Release only after hardware-gated consent.</span>
+            </div>
+            <div class="title-meta">
+                <span class="badge muted">Cross-platform</span>
+                <span class="badge muted">HSM required</span>
+                <span class="badge muted">W3C DID / VC aligned</span>
+                <span class="badge muted">Australia-first framing</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Agenda -->
+    <div class="slide-container" id="s02-agenda" data-short-title="Agenda">
+        <p class="slide-kicker">Presentation arc</p>
+        <h2 class="slide-title">How this deck is structured</h2>
+        <p class="subtitle">Not chat chronology — a coherent path from problem → protocol → exchange → proof.</p>
+        <div class="content-area">
+            <div class="agenda-grid">
+                <div class="agenda-item"><span class="agenda-num">01</span><span>Problem (forms, errors, honeypots, pandemic lessons)</span></div>
+                <div class="agenda-item"><span class="agenda-num">02</span><span>Solution &amp; trust triangle</span></div>
+                <div class="agenda-item"><span class="agenda-num">03</span><span>Platform stance &amp; security model</span></div>
+                <div class="agenda-item"><span class="agenda-num">04</span><span>Store, standards, selective disclosure</span></div>
+                <div class="agenda-item"><span class="agenda-num">05</span><span>Trust, retention, request model</span></div>
+                <div class="agenda-item"><span class="agenda-num">06</span><span>Web &amp; proximity exchange</span></div>
+                <div class="agenda-item"><span class="agenda-num">07</span><span>Use cases &amp; PoC criteria</span></div>
+                <div class="agenda-item"><span class="agenda-num">08</span><span>Positioning, open questions, close</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. What is CLAVIS -->
+    <div class="slide-container" id="s03-what" data-short-title="What is CLAVIS">
+        <p class="slide-kicker">Definition</p>
+        <h2 class="slide-title">What CLAVIS is</h2>
+        <p class="subtitle">A cross-platform personal data vault and protocol — not a central identity database.</p>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-vault"></i></div>
+                    <h3>Holder vault</h3>
+                    <p>Stores passports, medical, financial, education, property, and residential credentials encrypted at rest on the user’s device.</p>
+                </div>
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-microchip"></i></div>
+                    <h3>Hardware gate</h3>
+                    <p>Signing and decryption keys live in a hardware security module. No HSM → out of scope for the protocol.</p>
+                </div>
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-lock"></i></div>
+                    <h3>Consented release</h3>
+                    <p>Data leaves only as an encrypted Verifiable Presentation after biometrics / PIN (and step-up MFA when risk is high).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION: Problem -->
+    <div class="slide-container" id="s04-sec-problem" data-short-title="§ Problem">
+        <div class="section-divider">
+            <span class="section-num">Section 01</span>
+            <h2>The problem is structural, not a missing form field</h2>
+            <p>Form fatigue, admin burden, data-entry harm, portal honeypots, and purpose-unbound check-ins.</p>
+        </div>
+    </div>
+
+    <!-- 5. Form fatigue -->
+    <div class="slide-container" id="s05-forms" data-short-title="Form fatigue">
+        <p class="slide-kicker">Australia-first framing</p>
+        <h2 class="slide-title">Form fatigue &amp; admin burden</h2>
+        <p class="subtitle">People re-enter the same personal data across paper and digital forms — then organisations re-verify and repair errors.</p>
+        <div class="content-area">
+            <div class="two-column">
+                <div class="bullet-list">
+                    <ul>
+                        <li><i class="fa-solid fa-file-lines"></i> Repeated identity, address, insurance, and history capture across healthcare, finance, hospitality, and government.</li>
+                        <li><i class="fa-solid fa-user-clock"></i> Manual verification and correction consume skilled labour that should be clinical or analytical work.</li>
+                        <li><i class="fa-solid fa-chart-line"></i> Admin friction compounds into a national productivity drag — not just user annoyance.</li>
+                    </ul>
+                </div>
+                <div class="panel">
+                    <h3>What CLAVIS changes</h3>
+                    <p>Replace “type it again” with a hardware-gated presentation of already-attested credentials — once consented, fields arrive in the verifier’s native schema.</p>
+                    <p class="speculate">Figures cited in early notes (e.g. healthcare error costs) are research placeholders from the design chat — treat as illustrative until owner-validated sources are locked.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Healthcare errors -->
+    <div class="slide-container" id="s06-health-errors" data-short-title="Healthcare errors">
+        <p class="slide-kicker">High-stakes domain</p>
+        <h2 class="slide-title">Healthcare: errors at the front door</h2>
+        <p class="subtitle">Wrong allergies, medications, or identifiers at admission are not paperwork problems — they are clinical risk.</p>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="tile alert">
+                    <div class="icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <h3>Transcription risk</h3>
+                    <p>Hand-copied or re-keyed fields introduce silent corruption into the chart.</p>
+                </div>
+                <div class="tile alert">
+                    <div class="icon"><i class="fa-solid fa-stethoscope"></i></div>
+                    <h3>Stale copies</h3>
+                    <p>Portal PDFs and prior admissions may not reflect the issuer’s current attestation.</p>
+                </div>
+                <div class="tile ok">
+                    <div class="icon"><i class="fa-solid fa-shield-heart"></i></div>
+                    <h3>CLAVIS response</h3>
+                    <p>Issuer-signed semantic credentials (e.g. FHIR-shaped) presented selectively under patient control.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. Honeypots -->
+    <div class="slide-container" id="s07-honeypots" data-short-title="Honeypots">
+        <p class="slide-kicker">Rental &amp; portals</p>
+        <h2 class="slide-title">Document honeypots</h2>
+        <p class="subtitle">“Upload your passport PDF” creates concentrated, long-lived copies — even for unsuccessful applications.</p>
+        <div class="content-area">
+            <div class="compare">
+                <div class="compare-col bad">
+                    <h3>Today</h3>
+                    <ul>
+                        <li>Millions of IDs sit on a few portals</li>
+                        <li>Agencies retain copies for years</li>
+                        <li>Breach surface is the whole archive</li>
+                        <li>Applicant loses practical control</li>
+                    </ul>
+                </div>
+                <div class="compare-col good">
+                    <h3>With CLAVIS</h3>
+                    <ul>
+                        <li>Credentials remain on the holder device</li>
+                        <li>Verifier gets a purpose-bound presentation</li>
+                        <li>Proofs (e.g. income threshold) replace bulk PDFs</li>
+                        <li>Retention contract + deletion certificate</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. Pandemic -->
+    <div class="slide-container" id="s08-pandemic" data-short-title="Pandemic lessons">
+        <p class="slide-kicker">Structural privacy</p>
+        <h2 class="slide-title">Pandemic check-ins: the lesson</h2>
+        <p class="subtitle">Emergency QR systems collected identity without purpose binding — trust eroded when data was reused beyond health.</p>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="tile warn">
+                    <div class="icon"><i class="fa-solid fa-eye"></i></div>
+                    <h3>Surveillance creep</h3>
+                    <p>Check-in data accessed for non-health investigations in several Australian jurisdictions — public trust damage.</p>
+                </div>
+                <div class="tile warn">
+                    <div class="icon"><i class="fa-solid fa-puzzle-piece"></i></div>
+                    <h3>Third-party sprawl</h3>
+                    <p>Unverified venue apps created fragmented honeypots of names and phones.</p>
+                </div>
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-link"></i></div>
+                    <h3>Design fix</h3>
+                    <p>Cryptographic purpose binding, ephemeral handshakes, and verification-over-collection (e.g. status tick without storing identity).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION: Solution -->
+    <div class="slide-container" id="s09-sec-solution" data-short-title="§ Solution">
+        <div class="section-divider">
+            <span class="section-num">Section 02</span>
+            <h2>Solution: a holder vault in a standards trust triangle</h2>
+            <p>Encrypt locally. Gate with hardware. Present selectively. Never mass-export plaintext.</p>
+        </div>
+    </div>
+
+    <!-- 10. Solution overview -->
+    <div class="slide-container" id="s10-solution" data-short-title="Solution overview">
+        <p class="slide-kicker">In one picture</p>
+        <h2 class="slide-title">Solution overview</h2>
+        <div class="content-area">
+            <div class="flow-row">
+                <div class="flow-step">
+                    <div class="step-num">01</div>
+                    <h3>Store</h3>
+                    <p>Encrypted credentials at rest; keys in HSM / TEE / Secure Enclave / TPM.</p>
+                </div>
+                <span class="flow-arrow"><i class="fa-solid fa-chevron-right"></i></span>
+                <div class="flow-step">
+                    <div class="step-num">02</div>
+                    <h3>Request</h3>
+                    <p>Verifier sends signed request: fields, purpose, retention.</p>
+                </div>
+                <span class="flow-arrow"><i class="fa-solid fa-chevron-right"></i></span>
+                <div class="flow-step">
+                    <div class="step-num">03</div>
+                    <h3>Authorize</h3>
+                    <p>User sees trust tier + anomaly flags; biometric / PIN unlocks key use.</p>
+                </div>
+                <span class="flow-arrow"><i class="fa-solid fa-chevron-right"></i></span>
+                <div class="flow-step">
+                    <div class="step-num">04</div>
+                    <h3>Present</h3>
+                    <p>Encrypted Verifiable Presentation to verifier only — audited locally.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 11. Trust triangle -->
+    <div class="slide-container" id="s11-triangle" data-short-title="Trust triangle">
+        <p class="slide-kicker">DID / VC roles</p>
+        <h2 class="slide-title">Trust triangle + Registry</h2>
+        <p class="subtitle">CLAVIS is the Holder. Issuers attest. Verifiers request. The Registry ranks who is asking.</p>
+        <div class="content-area">
+            <div class="roles-grid">
+                <div class="role-card">
+                    <div class="icon"><i class="fa-solid fa-stamp"></i></div>
+                    <h3>Issuer</h3>
+                    <p>Clinic, bank, licensed professional, agency — signs credentials.</p>
+                </div>
+                <div class="role-card holder">
+                    <div class="icon"><i class="fa-solid fa-mobile-screen"></i></div>
+                    <h3>Holder</h3>
+                    <p>CLAVIS vault on the user’s device — stores, discloses, audits.</p>
+                </div>
+                <div class="role-card">
+                    <div class="icon"><i class="fa-solid fa-building"></i></div>
+                    <h3>Verifier</h3>
+                    <p>App, site, or terminal requesting a presentation.</p>
+                </div>
+                <div class="role-card">
+                    <div class="icon"><i class="fa-solid fa-address-book"></i></div>
+                    <h3>Registry</h3>
+                    <p>Trust directory: Trusted / Registered / Non-Registered.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 12. Data taxonomy -->
+    <div class="slide-container" id="s12-taxonomy" data-short-title="Data types">
+        <p class="slide-kicker">What the vault holds</p>
+        <h2 class="slide-title">Credential taxonomy</h2>
+        <div class="content-area">
+            <div class="table-layout">
+                <table>
+                    <thead>
+                        <tr><th>Category</th><th>Examples</th><th>Typical schemas</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Personal</strong></td><td>Name, DOB, contacts, photo</td><td>Schema.org Person</td></tr>
+                        <tr><td><strong>Medical</strong></td><td>Allergies, immunisations, labs</td><td>HL7 FHIR</td></tr>
+                        <tr><td><strong>Financial</strong></td><td>Accounts, income attestations</td><td>CDR / ISO 20022</td></tr>
+                        <tr><td><strong>Education</strong></td><td>Degrees, certifications</td><td>Open Badges / ELM</td></tr>
+                        <tr><td><strong>Property</strong></td><td>Title, ownership proofs</td><td>Domain-specific + Schema.org</td></tr>
+                        <tr><td><strong>Residential</strong></td><td>Lease, tenancy history</td><td>Lease / tenancy attestations</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION: Platform & security -->
+    <div class="slide-container" id="s13-sec-platform" data-short-title="§ Platform">
+        <div class="section-divider">
+            <span class="section-num">Section 03</span>
+            <h2>Cross-platform by design. Hardware is non-negotiable.</h2>
+            <p>Early Android-only framing was a draft mistake. The protocol is platform-independent.</p>
+        </div>
+    </div>
+
+    <!-- 14. Platform -->
+    <div class="slide-container" id="s14-platform" data-short-title="Platform stance">
+        <p class="slide-kicker">Critical correction</p>
+        <h2 class="slide-title">Platform stance</h2>
+        <p class="subtitle">Target: Android, iOS, Linux, Windows (and equivalents). Devices without hardware-backed crypto are out of scope.</p>
+        <div class="content-area">
+            <div class="platform-row">
+                <div class="platform-chip">
+                    <div class="icon"><i class="fa-brands fa-android"></i></div>
+                    <strong>Android</strong>
+                    <span>Keystore / StrongBox</span>
+                </div>
+                <div class="platform-chip">
+                    <div class="icon"><i class="fa-brands fa-apple"></i></div>
+                    <strong>iOS</strong>
+                    <span>Secure Enclave</span>
+                </div>
+                <div class="platform-chip">
+                    <div class="icon"><i class="fa-brands fa-linux"></i></div>
+                    <strong>Linux</strong>
+                    <span>TEE / TPM path</span>
+                </div>
+                <div class="platform-chip">
+                    <div class="icon"><i class="fa-brands fa-windows"></i></div>
+                    <strong>Windows</strong>
+                    <span>TPM / platform crypto</span>
+                </div>
+            </div>
+            <div class="panel">
+                <p style="margin:0;font-size:20px;">APIs differ; the protocol does not. Canvas titles like “Secure Android Data Vault” are historical draft language — not product scope.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 15. Security model -->
+    <div class="slide-container" id="s15-security" data-short-title="Security model">
+        <p class="slide-kicker">Hard principles</p>
+        <h2 class="slide-title">Security model</h2>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-key"></i></div>
+                    <h3>Keys in HSM</h3>
+                    <p>Signing / unwrap keys are non-exportable. Identity presentations cannot be cloned to non-TEE devices.</p>
+                </div>
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-database"></i></div>
+                    <h3>Encrypted at rest</h3>
+                    <p>Credentials never sit as plaintext on disk. Decrypt only for an authorised presentation, then wipe memory.</p>
+                </div>
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-ban"></i></div>
+                    <h3>No mass export</h3>
+                    <p>Protocol forbids bulk plaintext dump. Release is per-request, encrypted to the verifier’s key.</p>
+                </div>
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-clipboard-list"></i></div>
+                    <h3>Local audit</h3>
+                    <p>Immutable receipt of demand: who, what, when, purpose, retention — held by the holder.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 16. Hardware gate -->
+    <div class="slide-container" id="s16-hw-gate" data-short-title="Hardware gate">
+        <p class="slide-kicker">Subject authorization</p>
+        <h2 class="slide-title">The hardware gate</h2>
+        <p class="subtitle">The HSM releases key use only after successful user verification — biometrics and/or PIN.</p>
+        <div class="content-area">
+            <div class="two-column equal">
+                <div class="panel">
+                    <h3>Baseline</h3>
+                    <ul>
+                        <li>Show verifier identity + trust tier</li>
+                        <li>Show requested fields + purpose + retention</li>
+                        <li>User verification unlocks signing / decrypt</li>
+                    </ul>
+                </div>
+                <div class="panel">
+                    <h3>Step-up MFA</h3>
+                    <ul>
+                        <li>Triggered for higher-risk transfers</li>
+                        <li>Especially to Registered (not Trusted) operators</li>
+                        <li>e.g. biometric + PIN before medical / financial release</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 17. Face-to-data -->
+    <div class="slide-container" id="s17-face" data-short-title="Face-to-data">
+        <p class="slide-kicker">In-person assurance</p>
+        <h2 class="slide-title">Face-to-data binding</h2>
+        <p class="subtitle">A phone can be handed over. A photo bound into the credential tree makes physical impersonation harder.</p>
+        <div class="content-area">
+            <div class="two-column">
+                <div class="bullet-list">
+                    <ul>
+                        <li><i class="fa-solid fa-id-card"></i> Portrait is part of the Verifiable Credential / Merkle structure — not a loose JPEG.</li>
+                        <li><i class="fa-solid fa-check-double"></i> Verifier receives fields + photo + proof; first validates crypto, then visually matches the person.</li>
+                        <li><i class="fa-solid fa-image"></i> PoC nuance: tree may hold a high-res hash while a thumbnail travels for fast display.</li>
+                    </ul>
+                </div>
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-user-check"></i></div>
+                    <h3>Human factor</h3>
+                    <p>CLAVIS protects the identification act itself: the face on the verifier screen is cryptographically tethered to the attested fields.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION: Store & standards -->
+    <div class="slide-container" id="s18-sec-store" data-short-title="§ Store &amp; standards">
+        <div class="section-divider">
+            <span class="section-num">Section 04</span>
+            <h2>No honeypot database. Speak the verifier’s language.</h2>
+            <p>Index + containers. Industry schemas. Selective disclosure.</p>
+        </div>
+    </div>
+
+    <!-- 19. Data store -->
+    <div class="slide-container" id="s19-store" data-short-title="Data store">
+        <p class="slide-kicker">Encrypted Document Store</p>
+        <h2 class="slide-title">Index + per-document containers</h2>
+        <p class="subtitle">Not one relational dump of every passport and lab result.</p>
+        <div class="content-area">
+            <div class="store-diagram">
+                <div class="index-box">
+                    <h3>Encrypted index</h3>
+                    <p>UI metadata only: doc id, type, title, issue date. No PII payload. Unlocked to paint the home screen.</p>
+                    <p style="margin-top:16px;color:var(--muted);font-size:16px;">Platform example: encrypted preferences / secure store — not a product lock-in.</p>
+                </div>
+                <div class="blob-grid">
+                    <h3>Document containers</h3>
+                    <div class="blob-list" style="margin-top:12px;">
+                        <div class="blob"><strong>BLOB</strong>Passport VC</div>
+                        <div class="blob"><strong>BLOB</strong>FHIR Patient</div>
+                        <div class="blob"><strong>BLOB</strong>Income attest.</div>
+                        <div class="blob"><strong>BLOB</strong>Lease attest.</div>
+                    </div>
+                    <p style="margin-top:14px;font-size:16px;color:var(--muted);">Lazy decrypt one container at a time → present → wipe RAM. Deleting a file is Right-to-be-Forgotten at the filesystem.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 20. Why no honeypot DB -->
+    <div class="slide-container" id="s20-no-honeypot" data-short-title="Why no central DB">
+        <p class="slide-kicker">Architecture thesis</p>
+        <h2 class="slide-title">There is no central user database</h2>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-bomb"></i></div>
+                    <h3>No single dump</h3>
+                    <p>Compromise of one container does not yield the whole archive.</p>
+                </div>
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-code"></i></div>
+                    <h3>Native VCs</h3>
+                    <p>Store original JSON-LD — avoid remapping passport fields into SQL tables.</p>
+                </div>
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-trash-can"></i></div>
+                    <h3>Deletion that works</h3>
+                    <p>Physical file removal beats scrubbing indexes across a monolithic DB.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 21. Standards -->
+    <div class="slide-container" id="s21-standards" data-short-title="Standards">
+        <p class="slide-kicker">Zero-mapping intent</p>
+        <h2 class="slide-title">Standards over proprietary fields</h2>
+        <p class="subtitle">CLAVIS speaks Schema.org, FHIR, CDR / ISO 20022 — so verifiers do not invent a “CLAVIS dialect.”</p>
+        <div class="content-area">
+            <div class="two-column">
+                <div class="bullet-list">
+                    <ul>
+                        <li><i class="fa-solid fa-globe"></i> <strong>W3C DID / VC</strong> — trust triangle, presentations, proofs.</li>
+                        <li><i class="fa-solid fa-hospital"></i> <strong>HL7 FHIR</strong> — medical resources hospitals already parse.</li>
+                        <li><i class="fa-solid fa-building-columns"></i> <strong>CDR / ISO 20022</strong> — finance-shaped payloads.</li>
+                        <li><i class="fa-solid fa-graduation-cap"></i> <strong>Open Badges / ELM</strong> — education credentials.</li>
+                    </ul>
+                </div>
+                <div class="panel">
+                    <h3>Zero-mapping</h3>
+                    <p>Verifier engineers use standard libraries. <code>familyName</code> means the same thing in the vault and in their system.</p>
+                    <p style="margin-top:12px;color:var(--muted);font-size:17px;">New domains add a <code>@context</code> — not a fork of the vault architecture.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 22. JSON-LD example -->
+    <div class="slide-container" id="s22-jsonld" data-short-title="Semantic payload">
+        <p class="slide-kicker">Illustrative shape</p>
+        <h2 class="slide-title">Semantic credential (medical sketch)</h2>
+        <p class="subtitle">Working example for specialists — not a locked schema.</p>
+        <div class="content-area">
+            <div class="two-column">
+                <div>
+                    <ul>
+                        <li><strong>@context</strong> binds W3C VC + FHIR vocabulary.</li>
+                        <li><strong>DIDs</strong> identify issuer and subject.</li>
+                        <li><strong>Proof</strong> can anchor a Merkle root so redacted leaves remain verifiable.</li>
+                    </ul>
+                    <p class="speculate">Exact proof type names and DID methods remain design-open; this slide shows intent, not a ratified crypto profile.</p>
+                </div>
+                <div class="terminal-box">
+                    <div class="terminal-header">medical_credential.sketch.json</div>
+                    <pre><code>{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "https://hl7.org/fhir/..."
+  ],
+  "type": ["VerifiableCredential", "MedicalRecord"],
+  "issuer": "did:example:health-org",
+  "credentialSubject": {
+    "id": "did:example:patient",
+    "resourceType": "Patient",
+    "bloodType": "A+",
+    "allergies": ["penicillin"]
+  },
+  "proof": {
+    "type": "MerkleTreeProof",
+    "merkleRoot": "a7b8…d3c4"
+  }
+}</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 23. Selective disclosure -->
+    <div class="slide-container" id="s23-selective" data-short-title="Selective disclosure">
+        <p class="slide-kicker">Data minimisation</p>
+        <h2 class="slide-title">Selective disclosure (Merkle)</h2>
+        <p class="subtitle">Issuer signs the root. Holder reveals only needed leaves — with proofs for the rest.</p>
+        <div class="content-area">
+            <div class="two-column">
+                <div>
+                    <ul>
+                        <li>One full encrypted document; many possible presentations.</li>
+                        <li>Car rental needs name + licence entitlement — not home address or medical restrictions.</li>
+                        <li>Aligns with GDPR / Australian Privacy Principles minimisation.</li>
+                    </ul>
+                </div>
+                <div class="merkle-visual">
+                    <div class="tree-root">Merkle Root (issuer-signed)</div>
+                    <div class="tree-branches">
+                        <div class="branch exposed">Name — revealed</div>
+                        <div class="branch exposed">Licence class — revealed</div>
+                        <div class="branch hidden">Home address — withheld</div>
+                        <div class="branch hidden">Medical notes — withheld</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 24. ZKP future -->
+    <div class="slide-container" id="s24-zkp" data-short-title="ZKP path">
+        <p class="slide-kicker">Roadmap · speculative depth</p>
+        <h2 class="slide-title">Beyond Merkle: predicate proofs</h2>
+        <p class="subtitle">Merkle still reveals the unredacted raw value. True “over 18” without DOB needs ZKP / BBS+-class signatures.</p>
+        <div class="content-area">
+            <div class="two-column equal">
+                <div class="tile">
+                    <h3>Near-term PoC</h3>
+                    <p>Merkle selective disclosure is enough to prove the privacy granularity thesis.</p>
+                </div>
+                <div class="tile warn">
+                    <h3>Later upgrade path</h3>
+                    <p class="speculate">Architecture should not block BBS+ / ZKP later — unlinkability and predicates are desirable, not PoC-critical. Marked speculative until chosen.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION: Trust & retention -->
+    <div class="slide-container" id="s25-sec-trust" data-short-title="§ Trust &amp; retention">
+        <div class="section-divider">
+            <span class="section-num">Section 05</span>
+            <h2>Who is asking, why, and for how long?</h2>
+            <p>Operator tiers, domain affinity, purpose binding, deletion certificates.</p>
+        </div>
+    </div>
+
+    <!-- 26. Trust hierarchy -->
+    <div class="slide-container" id="s26-trust" data-short-title="Trust hierarchy">
+        <p class="slide-kicker">Operator Trust Hierarchy</p>
+        <h2 class="slide-title">Verifier trust tiers</h2>
+        <p class="subtitle">Every verifier has a CLAVIS DID. The Holder resolves it against the Registry before consent UI.</p>
+        <div class="content-area">
+            <div class="trust-tiers">
+                <div class="tier trusted">
+                    <div class="tier-label">Trusted</div>
+                    <h3>Verified professionals</h3>
+                    <p>Licensed entities (e.g. AHPRA, AFSL, legal) with statutory privacy duties.</p>
+                </div>
+                <div class="tier registered">
+                    <div class="tier-label">Registered</div>
+                    <h3>Identified businesses</h3>
+                    <p>Verified ABN/ACN holders with a declared business scope.</p>
+                </div>
+                <div class="tier nonreg">
+                    <div class="tier-label">Non-Registered</div>
+                    <h3>Unverified</h3>
+                    <p>Hard bands on sensitive data + high-friction warnings in the UI.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 27. Affinity -->
+    <div class="slide-container" id="s27-affinity" data-short-title="Domain affinity">
+        <p class="slide-kicker">Contextual authorisation</p>
+        <h2 class="slide-title">Domain–data affinity &amp; anomaly flags</h2>
+        <p class="subtitle">A financial broker requesting medical fields should feel wrong — the protocol makes that visible.</p>
+        <div class="content-area">
+            <div class="two-column">
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-diagram-project"></i></div>
+                    <h3>Affinity check</h3>
+                    <p>Compare verifier domain / declared scope to requested credential categories before showing a calm consent screen.</p>
+                </div>
+                <div class="tile alert">
+                    <div class="icon"><i class="fa-solid fa-flag"></i></div>
+                    <h3>Anomaly flag</h3>
+                    <p>Cross-domain overreach lights up in the UI and can force step-up MFA — even if the DID signature verifies.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 28. Retention -->
+    <div class="slide-container" id="s28-retention" data-short-title="Retention contract">
+        <p class="slide-kicker">Lifecycle contract</p>
+        <h2 class="slide-title">Retention, purpose, deletion</h2>
+        <p class="subtitle">Every presentation request carries signed retention metadata — not a vague privacy policy link.</p>
+        <div class="content-area">
+            <div class="table-layout">
+                <table>
+                    <thead>
+                        <tr><th>Field</th><th>Meaning</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Retention period</strong></td><td>Ephemeral, limited window, or statutory retention</td></tr>
+                        <tr><td><strong>Purpose binding</strong></td><td>Cryptographic commitment to stated use only (e.g. “health check-in”)</td></tr>
+                        <tr><td><strong>Certificate of Deletion</strong></td><td>On expiry, verifier returns a signed deletion proof to the holder</td></tr>
+                        <tr><td><strong>Revocation request</strong></td><td>Holder can demand erasure; verifier must confirm or cite legal hold</td></tr>
+                        <tr><td><strong>Registry consequence</strong></td><td>Missing deletion certificates → retention violation / trust degradation</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 29. Dataflow -->
+    <div class="slide-container" id="s29-dataflow" data-short-title="Dataflow">
+        <p class="slide-kicker">Protocol phases</p>
+        <h2 class="slide-title">Logical dataflow</h2>
+        <div class="content-area">
+            <div class="tiled-content col">
+                <div class="tile" style="flex-direction:row;gap:24px;align-items:flex-start;">
+                    <div style="min-width:140px;"><strong style="color:var(--accent);font-family:var(--mono);">Phase I</strong><br>Request</div>
+                    <p style="margin:0;">Verifier sends DID, required fields, retention policy. Holder verifies DID + domain–data affinity.</p>
+                </div>
+                <div class="tile" style="flex-direction:row;gap:24px;align-items:flex-start;">
+                    <div style="min-width:140px;"><strong style="color:var(--accent);font-family:var(--mono);">Phase II</strong><br>Authorize</div>
+                    <p style="margin:0;">UI shows trust status. HSM unlocks after biometric / MFA. Step-up for high-risk Registered operators.</p>
+                </div>
+                <div class="tile" style="flex-direction:row;gap:24px;align-items:flex-start;">
+                    <div style="min-width:140px;"><strong style="color:var(--accent);font-family:var(--mono);">Phase III</strong><br>Present</div>
+                    <p style="margin:0;">Hardware-signed VP encrypted to verifier public key. Local immutable audit: who / what / when / expiry.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 30. Signed requests -->
+    <div class="slide-container" id="s30-signed" data-short-title="Signed requests">
+        <p class="slide-kicker">Mutual accountability</p>
+        <h2 class="slide-title">Signed dynamic requests</h2>
+        <p class="subtitle">The verifier does not “ask casually” — it issues a signed obligation. Non-repudiation for both sides.</p>
+        <div class="content-area">
+            <div class="two-column">
+                <div class="bullet-list">
+                    <ul>
+                        <li><i class="fa-solid fa-file-signature"></i> Organisation long-term cert + per-transaction signature.</li>
+                        <li><i class="fa-solid fa-clock"></i> Dynamic JWT/JWS fields: <code>iat</code>, <code>exp</code>, <code>nonce</code>, <code>aud</code>.</li>
+                        <li><i class="fa-solid fa-shield"></i> Stops replay / phishing reuse of stale request QR links.</li>
+                        <li><i class="fa-solid fa-scale-balanced"></i> Holder keeps cryptographic receipt of demand.</li>
+                    </ul>
+                </div>
+                <div class="panel">
+                    <h3>Why it matters</h3>
+                    <p>After a leak, the citizen can prove Clinic X requested fields A &amp; B for purpose C on date D — and Clinic X cannot claim the user volunteered them unsolicited.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 31. Static manifests -->
+    <div class="slide-container" id="s31-static" data-short-title="Static manifests">
+        <p class="slide-kicker">Adoption ladder</p>
+        <h2 class="slide-title">Dynamic vs static manifests</h2>
+        <p class="subtitle">High-stakes verifiers get short-lived signed requests. Low-stakes sites can host a one-time signed well-known file.</p>
+        <div class="content-area">
+            <div class="compare">
+                <div class="compare-col good">
+                    <h3>Dynamic (high-stakes)</h3>
+                    <p>Banks, clinics, government. SDK mints per-session JWT. UI: protected session.</p>
+                </div>
+                <div class="compare-col">
+                    <h3>Static (low-stakes)</h3>
+                    <p><code>/.well-known/clavis/manifest.json</code> signed once. Nickname / age-over-18 class fields. UI: basic verification. Replay risk → hard-limit away from sensitive PII.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION: Channels -->
+    <div class="slide-container" id="s32-sec-channels" data-short-title="§ Channels">
+        <div class="section-divider">
+            <span class="section-num">Section 06</span>
+            <h2>Web handshake and proximity exchange</h2>
+            <p>Compliant sites, legacy form-fill fallback, QR / NFC / BLE, offline ISO 18013-5 style.</p>
+        </div>
+    </div>
+
+    <!-- 33. Web modes -->
+    <div class="slide-container" id="s33-web" data-short-title="Web modes">
+        <p class="slide-kicker">Browser / extension path</p>
+        <h2 class="slide-title">Compliant handshake vs legacy fill</h2>
+        <div class="content-area">
+            <div class="two-column equal">
+                <div class="tile ok">
+                    <div class="icon"><i class="fa-solid fa-handshake"></i></div>
+                    <h3>Compliant</h3>
+                    <p>Site embeds schema metadata. Extension / client detects it and runs an encrypted vault handshake — full protocol path.</p>
+                </div>
+                <div class="tile warn">
+                    <div class="icon"><i class="fa-solid fa-keyboard"></i></div>
+                    <h3>Legacy fallback</h3>
+                    <p>Heuristic field mapping + proactive overlay for user confirm. Inject via HTTPS with explicit warning: no encrypted CLAVIS handshake.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 34. Proximity -->
+    <div class="slide-container" id="s34-proximity" data-short-title="Proximity">
+        <p class="slide-kicker">In-person channels</p>
+        <h2 class="slide-title">QR · NFC · BLE</h2>
+        <p class="subtitle">Hospital desks, agencies, and banks need more than a browser.</p>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-qrcode"></i></div>
+                    <h3>QR</h3>
+                    <p>Verifier shows session QR; holder scans → secure session. Works with a screen or paper stand.</p>
+                </div>
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-wifi"></i></div>
+                    <h3>NFC</h3>
+                    <p>Tap-to-verify: centimetre-range engagement, pay-like UX, strong physical presence.</p>
+                </div>
+                <div class="tile">
+                    <div class="icon"><i class="fa-brands fa-bluetooth-b"></i></div>
+                    <h3>BLE</h3>
+                    <p>Larger payloads (e.g. imaging-heavy records) over a short-lived local link when online is weak.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 35. ISO 18013-5 -->
+    <div class="slide-container" id="s35-iso" data-short-title="ISO 18013-5">
+        <p class="slide-kicker">Offline-capable</p>
+        <h2 class="slide-title">ISO 18013-5 style engagement</h2>
+        <p class="subtitle">Two stages: device engagement, then encrypted peer data retrieval — even without cellular.</p>
+        <div class="content-area">
+            <div class="flow-row">
+                <div class="flow-step">
+                    <div class="step-num">Engage</div>
+                    <h3>NFC tap or QR</h3>
+                    <p>Exchange channel parameters; QR may bootstrap an encrypted BLE session.</p>
+                </div>
+                <span class="flow-arrow"><i class="fa-solid fa-chevron-right"></i></span>
+                <div class="flow-step">
+                    <div class="step-num">Authorize</div>
+                    <h3>Biometric gate</h3>
+                    <p>User confirms verifier + fields on-device before any payload leaves.</p>
+                </div>
+                <span class="flow-arrow"><i class="fa-solid fa-chevron-right"></i></span>
+                <div class="flow-step">
+                    <div class="step-num">Retrieve</div>
+                    <h3>P2P encrypted</h3>
+                    <p>Session keys die after the check. Basement wards and remote sites still work.</p>
+                </div>
+            </div>
+            <p class="footnote">Smartphone as next-gen smart card — agencies upgrade terminals/software, not plastic inventory.</p>
+        </div>
+    </div>
+
+    <!-- SECTION: Use cases -->
+    <div class="slide-container" id="s36-sec-usecases" data-short-title="§ Use cases">
+        <div class="section-divider">
+            <span class="section-num">Section 07</span>
+            <h2>Prove it where it hurts: medical first</h2>
+            <p>Then rental sovereignty and government services — not toy bartender demos.</p>
+        </div>
+    </div>
+
+    <!-- 37. Medical -->
+    <div class="slide-container" id="s37-medical" data-short-title="Medical admission">
+        <p class="slide-kicker">Primary use case</p>
+        <h2 class="slide-title">Zero-error healthcare admission</h2>
+        <div class="content-area">
+            <div class="two-column">
+                <div class="bullet-list">
+                    <ul>
+                        <li><i class="fa-solid fa-hospital-user"></i> Patient presents issuer-signed FHIR-shaped credentials at triage.</li>
+                        <li><i class="fa-solid fa-sliders"></i> Selective disclosure: emergency vs routine visit scopes.</li>
+                        <li><i class="fa-solid fa-plug"></i> Hospital EHR ingests native resources — no re-typing allergies / blood type.</li>
+                        <li><i class="fa-solid fa-user-lock"></i> Sensitive diagnoses stay withheld until the patient expands scope.</li>
+                    </ul>
+                </div>
+                <div class="panel">
+                    <h3>Impact intent</h3>
+                    <p>Cut registration time. Remove transcription errors on critical fields. Keep patient sovereignty over mental-health and other sensitive nodes.</p>
+                    <p class="speculate">Quantitative “90% faster” style claims from draft notes need owner-validated measurement plans before external use.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 38. Rental -->
+    <div class="slide-container" id="s38-rental" data-short-title="Rental market">
+        <p class="slide-kicker">Data sovereignty</p>
+        <h2 class="slide-title">Transparent rental — end the PDF honeypot</h2>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-house-lock"></i></div>
+                    <h3>Identity proof</h3>
+                    <p>Agency receives cryptographic confirmation — not a lasting passport scan archive.</p>
+                </div>
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-coins"></i></div>
+                    <h3>Income proof</h3>
+                    <p>Merkle / predicate path: “income ≥ $X” without exposing every transaction.</p>
+                </div>
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-file-circle-xmark"></i></div>
+                    <h3>Retention contract</h3>
+                    <p>Rejected applications trigger deletion demand; missing Certificate of Deletion hurts registry standing.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 39. Government -->
+    <div class="slide-container" id="s39-gov" data-short-title="Government">
+        <p class="slide-kicker">Public sector</p>
+        <h2 class="slide-title">Government &amp; high-assurance services</h2>
+        <div class="content-area">
+            <div class="two-column equal">
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-landmark"></i></div>
+                    <h3>Service counters</h3>
+                    <p>Staff tablets accept NFC/QR presentations with face-to-data match — same pattern as payments terminals.</p>
+                </div>
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-shield-halved"></i></div>
+                    <h3>Purpose-bound civic data</h3>
+                    <p>Structural privacy lessons from pandemic systems: bind every packet to purpose and expiry by design.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 40. PoC -->
+    <div class="slide-container" id="s40-poc" data-short-title="PoC criteria">
+        <p class="slide-kicker">What success looks like</p>
+        <h2 class="slide-title">PoC criteria (medical focus)</h2>
+        <p class="subtitle">Three theses — not a feature farm.</p>
+        <div class="content-area">
+            <div class="table-layout">
+                <table>
+                    <thead>
+                        <tr><th>Thesis</th><th>Demonstration</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Hardware-to-data binding</strong></td>
+                            <td>Decrypt / sign only via HSM + user auth; hard-fail without hardware crypto</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Selective disclosure</strong></td>
+                            <td>Hospital asks blood type; mental-health leaf stays redacted with Merkle proof</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Semantic credentials</strong></td>
+                            <td>JSON-LD / VC payload shaped for real FHIR-oriented medical use</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Audit pulse</strong></td>
+                            <td>UI shows receipt of demand + retention window after release</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 41. Recovery detour -->
+    <div class="slide-container" id="s41-recovery" data-short-title="Recovery / UX">
+        <p class="slide-kicker">Detour · open design</p>
+        <h2 class="slide-title">Lost device &amp; key recovery</h2>
+        <p class="subtitle">Hardware-bound keys are a feature and a UX hazard. Recovery policy must not recreate exportable masters.</p>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="tile warn">
+                    <div class="icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <h3>Tension</h3>
+                    <p>Non-exportable HSM keys mean “restore from cloud backup of private key” is incompatible with the security model.</p>
+                </div>
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-rotate"></i></div>
+                    <h3>Likely direction</h3>
+                    <p>Re-enrolment + re-issuance from Issuers; encrypted container backup that only unwraps on a new attested HSM after strong identity proof.</p>
+                </div>
+                <div class="tile">
+                    <div class="icon"><i class="fa-solid fa-comments"></i></div>
+                    <h3>Status</h3>
+                    <p class="speculate">Recovery UX remains an open protocol question from the design chat — not a locked CLAVIS claim yet.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION: Positioning -->
+    <div class="slide-container" id="s42-sec-position" data-short-title="§ Positioning">
+        <div class="section-divider">
+            <span class="section-num">Section 08</span>
+            <h2>Where CLAVIS sits — and what stays open</h2>
+            <p>Related ecosystems discussed in chat; speculation clearly marked.</p>
+        </div>
+    </div>
+
+    <!-- 43. Ecosystem -->
+    <div class="slide-container" id="s43-ecosystem" data-short-title="Related ecosystems">
+        <p class="slide-kicker">Market context from design chat</p>
+        <h2 class="slide-title">Related pieces, not duplicates</h2>
+        <div class="content-area">
+            <div class="table-layout">
+                <table>
+                    <thead>
+                        <tr><th>Family</th><th>Overlap</th><th>Gap CLAVIS targets</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Digital ID wallets</strong></td>
+                            <td>TEE IDs, ISO 18013-5 presentment</td>
+                            <td>Often limited to official docs — not a general data broker vault</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Password managers</strong></td>
+                            <td>Encrypted personal vault UX</td>
+                            <td>Not hardware-gated VC presentations to third parties</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Health / CDR apps</strong></td>
+                            <td>Sector schemas &amp; consent</td>
+                            <td>Siloed; not a universal cross-domain holder protocol</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="footnote speculate" style="margin-top:18px;">Competitive framing above follows the chat’s market review draft — treat as orientation, not a published competitive claim.</p>
+        </div>
+    </div>
+
+    <!-- 44. Open questions -->
+    <div class="slide-container" id="s44-open" data-short-title="Open questions">
+        <p class="slide-kicker">Honest backlog</p>
+        <h2 class="slide-title">Open questions</h2>
+        <div class="content-area">
+            <div class="agenda-grid">
+                <div class="agenda-item"><span class="agenda-num">?</span><span>Registry governance (centralised vs federated)</span></div>
+                <div class="agenda-item"><span class="agenda-num">?</span><span>Key recovery without weakening HSM binding</span></div>
+                <div class="agenda-item"><span class="agenda-num">?</span><span>Exact crypto profile (Merkle now → ZKP later)</span></div>
+                <div class="agenda-item"><span class="agenda-num">?</span><span>Revocation privacy (status lists vs phone-home)</span></div>
+                <div class="agenda-item"><span class="agenda-num">?</span><span>Static manifest threat model &amp; field allowlists</span></div>
+                <div class="agenda-item"><span class="agenda-num">?</span><span>Legal force of Certificate of Deletion</span></div>
+                <div class="agenda-item"><span class="agenda-num">?</span><span>Linux/Windows HSM attestation bar for PoC</span></div>
+                <div class="agenda-item"><span class="agenda-num">?</span><span>Canvas/draft specs awaiting owner ratification</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 45. Speculative mapping -->
+    <div class="slide-container" id="s45-speculative" data-short-title="Speculative notes">
+        <p class="slide-kicker">Do not over-claim</p>
+        <h2 class="slide-title">Speculative / draft-only topics</h2>
+        <p class="subtitle">Mentioned in chat or canvas — useful for specialists, not owner-approved requirements.</p>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="tile warn">
+                    <h3>Assurance mappings</h3>
+                    <p class="speculate">NIST AAL3 / FIDO2 alignment discussed as aspiration — needs formal gap analysis.</p>
+                </div>
+                <div class="tile warn">
+                    <h3>Status List 2021</h3>
+                    <p class="speculate">Privacy-preserving revocation sketched in drafts; not PoC-critical yet.</p>
+                </div>
+                <div class="tile warn">
+                    <h3>Canvas artefacts</h3>
+                    <p class="speculate">All <code>gemini-export/canvas/</code> HTML are unchecked drafts — including Android-centric titles.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 46. Summary -->
+    <div class="slide-container" id="s46-summary" data-short-title="Summary">
+        <p class="slide-kicker">Takeaways</p>
+        <h2 class="slide-title">CLAVIS in six lines</h2>
+        <div class="content-area">
+            <div class="bullet-list">
+                <ul>
+                    <li><i class="fa-solid fa-1"></i> Holder vault: encrypted credentials on-device, never a central honeypot DB.</li>
+                    <li><i class="fa-solid fa-2"></i> Hardware mandatory; protocol is cross-platform.</li>
+                    <li><i class="fa-solid fa-3"></i> Consent is gated; presentations are encrypted to the verifier.</li>
+                    <li><i class="fa-solid fa-4"></i> Standards-native payloads + selective disclosure.</li>
+                    <li><i class="fa-solid fa-5"></i> Trust tiers, purpose binding, and deletion accountability.</li>
+                    <li><i class="fa-solid fa-6"></i> Prove it in medical / government — then expand.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 47. Close -->
+    <div class="slide-container" id="s47-close" data-short-title="Close">
+        <div class="qa-layout">
+            <p class="slide-kicker" style="justify-content:center;text-align:center;">Discussion</p>
+            <h2>Questions</h2>
+            <p>CLAVIS — credentials stay with the holder.<br>Hardware gates consent. Standards carry the payload.</p>
+            <div class="title-meta" style="justify-content:center;margin-top:28px;">
+                <span class="badge">DID / VC</span>
+                <span class="badge">HSM</span>
+                <span class="badge">Selective disclosure</span>
+                <span class="badge">Purpose binding</span>
+            </div>
+        </div>
+    </div>
+
+    <button id="menu-toggle" onclick="toggleSidebar()" aria-label="Open slide menu">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-actions">
+                <button id="reorder-toggle" class="sidebar-btn icon-btn" type="button" aria-pressed="false" aria-label="Reorder slides" title="Reorder slides" hidden>
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <button id="reorder-save" class="sidebar-btn is-primary" type="button" hidden>Save</button>
+                <button id="reorder-cancel" class="sidebar-btn" type="button" hidden>Cancel</button>
+                <button id="reorder-reset" class="sidebar-btn" type="button" hidden>Reset</button>
+            </div>
+        </div>
+        <div id="sidebar-reorder-hint" class="sidebar-reorder-hint" hidden>Drag thumbnails to reorder, then Save.</div>
+        <div id="sidebar-status" class="sidebar-status" hidden></div>
+        <div id="sidebar-thumbnails"></div>
+    </div>
+
+    <div id="dots-container"></div>
+
+    <div class="nav-btn nav-up" onclick="prevSlide()" aria-label="Previous slide"><i class="fa-solid fa-chevron-up"></i></div>
+    <div class="nav-btn nav-down" onclick="nextSlide()" aria-label="Next slide"><i class="fa-solid fa-chevron-down"></i></div>
+
+    <script src="script.js"></script>
+</body>
+</html>

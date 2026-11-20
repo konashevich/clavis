@@ -1,0 +1,77 @@
+{
+  "Secure Android Data Vault Specification": {
+    "status": "full",
+    "file": "secure-android-data-vault-specification.html",
+    "chars": 3949,
+    "bytes": 10044
+  },
+  "Secure Vault Inter-App Protocol (SVIAP)": {
+    "status": "full",
+    "file": "secure-vault-inter-app-protocol-sviap.html",
+    "chars": 3532,
+    "bytes": 9403
+  },
+  "Draft Notes: Secure Vault": {
+    "status": "full",
+    "file": "draft-notes-secure-vault.html",
+    "chars": 4288,
+    "bytes": 11027
+  },
+  "Market Review: Secure Vault Project": {
+    "status": "full",
+    "file": "market-review-secure-vault-project.html",
+    "chars": 3020,
+    "bytes": 8283
+  },
+  "CLAVIS Protocol Specification": {
+    "status": "full",
+    "file": "clavis-protocol-specification.html",
+    "chars": 3879,
+    "bytes": 9501,
+    "note": "Full baseline via Canvas Previous-version walk"
+  },
+  "CLAVIS: Proof of Concept Roadmap (v1.1)": {
+    "status": "full",
+    "file": "clavis-proof-of-concept-roadmap-v1-1.html",
+    "chars": 2576,
+    "bytes": 10399
+  },
+  "Draft Notes: CLAVIS Project": {
+    "status": "partial",
+    "file": "draft-notes-clavis-project.html",
+    "chars": 23470,
+    "bytes": 82161,
+    "entries": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25
+    ],
+    "note": "Merged LpbbXc version snapshots; missing Entry #1-9 full text"
+  },
+  "CLAVIS: Minimal PoC Scope (Medical)": {
+    "status": "partial",
+    "file": "clavis-minimal-poc-scope-medical.html",
+    "chars": 499,
+    "bytes": 3473,
+    "note": "Still section 4 addendum delta only; LpbbXc/editor never returned full baseline"
+  },
+  "CLAVIS: Medical Credential Example": {
+    "status": "full",
+    "file": "clavis-medical-credential-example.html",
+    "chars": 870,
+    "bytes": 4593
+  }
+}
