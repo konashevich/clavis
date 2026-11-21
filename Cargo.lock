@@ -106,6 +106,8 @@ dependencies = [
  "ed25519-dalek",
  "hkdf",
  "rand",
+ "serde",
+ "serde_json",
  "sha2",
 ]
 

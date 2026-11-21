@@ -196,8 +196,13 @@ pub fn rewrap_with_passphrase(
     Ok(wrap_data_keys(module, &keys))
 }
 
+mod journal;
 mod store;
 
+pub use journal::{
+    ArrivedStatement, Journal, JournalParseError, JournalRow, StatementError, StatementKind,
+    StoredStatement,
+};
 pub use store::{
     open_body, open_index, open_journal, open_release, seal_store, Container, ContainerId,
     OpenError, OpenedContainer, SealedBody, SealedContainer, SealedStore, Store,
