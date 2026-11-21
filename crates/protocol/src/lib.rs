@@ -93,6 +93,27 @@ pub struct Presentation {
     pub disclosed: Vec<Disclosed>,
     pub holder_did: String,
     pub signature: Vec<u8>,
+    /// Issuer `did:key` when the holder presents an issuer signature.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub issuer_did: Option<String>,
+    /// Ed25519 signature of that issuer over the Merkle root.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub issuer_signature: Option<Vec<u8>>,
+    /// Credential kind presented for a verifier's local issuer anchor.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub credential_kind: Option<String>,
+    /// Request expiry, unix seconds. Programs apply their own clock skew.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expires_at: Option<i64>,
+}
+
+/// Issuer material carried inside an encrypted presentation.
+/// The verifier decides origin from these bytes and its own anchor.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct CarriedIssuer {
+    pub did: String,
+    pub signature: Vec<u8>,
+    pub kind: String,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -216,6 +237,48 @@ pub fn release(
     request: &Request,
     holder: &SigningKey,
 ) -> Result<SealedPresentation, Error> {
+    release_with(claims, request, holder, None, None, None, None)
+}
+
+/// [`release`] that also carries an issuer signature, a credential kind, and the
+/// request expiry inside the encrypted presentation. Pass `issuer: None` when
+/// the holder presents no issuer signature. Those bytes are covered by the
+/// holder signature.
+pub fn release_carrying(
+    claims: &[Claim],
+    request: &Request,
+    holder: &SigningKey,
+    issuer: Option<&CarriedIssuer>,
+    expires_at: i64,
+) -> Result<SealedPresentation, Error> {
+    let (issuer_did, issuer_signature, credential_kind) = match issuer {
+        Some(issuer) => (
+            Some(issuer.did.clone()),
+            Some(issuer.signature.clone()),
+            Some(issuer.kind.clone()),
+        ),
+        None => (None, None, None),
+    };
+    release_with(
+        claims,
+        request,
+        holder,
+        issuer_did,
+        issuer_signature,
+        credential_kind,
+        Some(expires_at),
+    )
+}
+
+fn release_with(
+    claims: &[Claim],
+    request: &Request,
+    holder: &SigningKey,
+    issuer_did: Option<String>,
+    issuer_signature: Option<Vec<u8>>,
+    credential_kind: Option<String>,
+    expires_at: Option<i64>,
+) -> Result<SealedPresentation, Error> {
     let tree = MerkleTree::build(claims)?;
     let mut disclosed = Vec::with_capacity(request.fields.len());
     for path in &request.fields {
@@ -241,6 +304,10 @@ pub fn release(
         disclosed,
         holder_did: did_key_ed25519(&holder.verifying_key().to_bytes()),
         signature: Vec::new(),
+        issuer_did,
+        issuer_signature,
+        credential_kind,
+        expires_at,
     };
     let message = signing_message(&presentation);
     presentation.signature = holder.sign(&message).to_bytes().to_vec();
@@ -335,7 +402,39 @@ fn signing_message(presentation: &Presentation) -> Vec<u8> {
             message.push(u8::from(step.sibling_is_left));
         }
     }
+    // Issuer did, issuer signature over the root, credential kind, request expiry.
+    message.extend_from_slice(b"carriage");
+    bind_bytes(
+        &mut message,
+        presentation.issuer_did.as_deref().map(|did| did.as_bytes()),
+    );
+    bind_bytes(&mut message, presentation.issuer_signature.as_deref());
+    bind_bytes(
+        &mut message,
+        presentation
+            .credential_kind
+            .as_deref()
+            .map(|kind| kind.as_bytes()),
+    );
+    match presentation.expires_at {
+        Some(expiry) => {
+            message.push(1);
+            message.extend_from_slice(&expiry.to_be_bytes());
+        }
+        None => message.push(0),
+    }
     message
+}
+
+fn bind_bytes(message: &mut Vec<u8>, value: Option<&[u8]>) {
+    match value {
+        Some(bytes) => {
+            message.push(1);
+            message.extend_from_slice(&(bytes.len() as u64).to_be_bytes());
+            message.extend_from_slice(bytes);
+        }
+        None => message.push(0),
+    }
 }
 
 fn leaf_hash(path: &str, value: &str) -> [u8; 32] {
