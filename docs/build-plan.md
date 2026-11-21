@@ -121,7 +121,7 @@
 - зависит: S03, S10.
 - машина: NAS.
 - приёмка: `cargo test -p clavis-holder --test one_container`
-- состояние: открыт.
+- состояние: закрыт.
 
 ### S12 — Держатель Windows
 
