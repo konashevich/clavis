@@ -143,6 +143,16 @@ impl PairwiseKey {
     ) -> Result<SealedPresentation, clavis_protocol::Error> {
         clavis_protocol::release(claims, request, &self.signing)
     }
+
+    /// Seal one presentation and carry `expires_at` for the verifier's freshness check.
+    pub fn release_expiring(
+        &self,
+        claims: &[Claim],
+        request: &Request,
+        expires_at: i64,
+    ) -> Result<SealedPresentation, clavis_protocol::Error> {
+        clavis_protocol::release_carrying(claims, request, &self.signing, None, expires_at)
+    }
 }
 
 pub fn wrap_data_keys(module: &impl Module, keys: &DataKeys) -> DataKeyWraps {
@@ -196,8 +206,14 @@ pub fn rewrap_with_passphrase(
     Ok(wrap_data_keys(module, &keys))
 }
 
+mod consent;
 mod journal;
 mod store;
+
+pub use consent::{
+    Card, Consent, ConsentMode, JournalEvent, Refusal, ReleaseError, CLOCK_SKEW_SECONDS,
+    KIND_EDUCATION, KIND_FINANCIAL, KIND_MEDICAL, KIND_PERSONAL, KIND_PROPERTY, KIND_RESIDENTIAL,
+};
 
 pub use journal::{
     ArrivedStatement, Journal, JournalParseError, JournalRow, StatementError, StatementKind,

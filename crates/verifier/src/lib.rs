@@ -3,6 +3,8 @@
 //! Origin is decided from the issuer bytes inside the presentation and from
 //! the local issuer anchor. A holder-supplied origin string is not read.
 
+use std::collections::{HashMap, HashSet};
+
 use clavis_protocol::{Presentation, SealedPresentation};
 use ed25519_dalek::{Signature, Verifier, VerifyingKey};
 use x25519_dalek::StaticSecret;
@@ -19,6 +21,8 @@ pub enum Error {
     Open(clavis_protocol::Error),
     HolderSignature,
     Freshness,
+    /// This nonce was already accepted for an open request.
+    Replay,
     Inclusion,
     IssuerSignature,
 }
@@ -29,6 +33,7 @@ impl std::fmt::Display for Error {
             Error::Open(err) => write!(f, "{err}"),
             Error::HolderSignature => write!(f, "holder signature failed"),
             Error::Freshness => write!(f, "freshness failed"),
+            Error::Replay => write!(f, "replay rejected"),
             Error::Inclusion => write!(f, "inclusion failed"),
             Error::IssuerSignature => write!(f, "issuer signature failed"),
         }
@@ -61,16 +66,64 @@ pub fn open_presentation(
     clavis_protocol::open(sealed, verifier_secret)
 }
 
-/// Decrypt with the verifier secret, then check freshness, inclusion, and the
-/// local issuer anchor. `now` is injected unix seconds. This path does not
-/// read a wall clock.
+/// Nonces this verifier has issued and not yet accepted.
+///
+/// [`accept`] rejects a nonce that is not still open, a request that has
+/// expired, and a nonce already accepted on this set.
+#[derive(Clone, Debug, Default)]
+pub struct OpenRequests {
+    open: HashMap<[u8; 32], i64>,
+    spent: HashSet<[u8; 32]>,
+}
+
+impl OpenRequests {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Remember one request. A spent nonce stays spent.
+    pub fn insert(&mut self, nonce: [u8; 32], expires_at: i64) {
+        if self.spent.contains(&nonce) {
+            return;
+        }
+        self.open.insert(nonce, expires_at);
+    }
+
+    fn screen(&self, nonce: &[u8; 32], now: i64) -> Result<(), Error> {
+        if self.spent.contains(nonce) {
+            return Err(Error::Replay);
+        }
+        let Some(&expires_at) = self.open.get(nonce) else {
+            return Err(Error::Freshness);
+        };
+        let Some(latest) = expires_at.checked_add(CLOCK_SKEW_SECONDS) else {
+            return Err(Error::Freshness);
+        };
+        if now > latest {
+            return Err(Error::Freshness);
+        }
+        Ok(())
+    }
+
+    fn spend(&mut self, nonce: &[u8; 32]) {
+        self.open.remove(nonce);
+        self.spent.insert(*nonce);
+    }
+}
+
+/// Decrypt with the verifier secret, then check that `expected_nonce` is a
+/// still-open request, that the request and the presentation have not expired,
+/// and that this nonce was not already accepted. `now` is injected unix seconds.
+/// This path does not read a wall clock.
 pub fn accept(
     sealed: &SealedPresentation,
     verifier_secret: &StaticSecret,
     anchor: &IssuerAnchor,
     expected_nonce: &[u8; 32],
     now: i64,
+    open_requests: &mut OpenRequests,
 ) -> Result<Accepted, Error> {
+    open_requests.screen(expected_nonce, now)?;
     let presentation = open_presentation(sealed, verifier_secret).map_err(Error::Open)?;
     clavis_protocol::verify_holder(&presentation).map_err(|_| Error::HolderSignature)?;
     if !fresh(&presentation, expected_nonce, now) {
@@ -84,6 +137,7 @@ pub fn accept(
         return Err(Error::Inclusion);
     }
     let (origin, anchor_name) = decide_origin(&presentation, anchor)?;
+    open_requests.spend(expected_nonce);
     Ok(Accepted {
         presentation,
         origin: origin.to_string(),

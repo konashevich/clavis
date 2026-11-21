@@ -3,7 +3,7 @@ use std::thread;
 use std::time::Duration;
 
 use clavis_holder_linux::{read_frame, write_frame, Frame, Holder, RejectReason};
-use clavis_protocol::{verify_holder, verify_inclusion, Claim, Request};
+use clavis_protocol::{verify_holder, verify_inclusion, Claim, Request, RequestForm};
 use clavis_verifier::open_presentation;
 use ed25519_dalek::SigningKey;
 use rand::rngs::OsRng;
@@ -17,7 +17,10 @@ const WITHHELD_PATH: &str = "Condition.code";
 
 fn contains(haystack: &[u8], needle: &str) -> bool {
     let needle = needle.as_bytes();
-    !needle.is_empty() && haystack.windows(needle.len()).any(|window| window == needle)
+    !needle.is_empty()
+        && haystack
+            .windows(needle.len())
+            .any(|window| window == needle)
 }
 
 fn claims() -> Vec<Claim> {
@@ -42,6 +45,12 @@ fn request(verifier_did: &str, verifier_x25519: [u8; 32], id: &str, nonce: [u8; 
         nonce,
         purpose: "приём в поликлинике".into(),
         retention: "данное обращение".into(),
+        form: RequestForm::Dynamic,
+        expires_at: None,
+        kinds: Vec::new(),
+        portrait: false,
+        document_number: false,
+        signature: Vec::new(),
     }
 }
 
