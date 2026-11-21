@@ -22,8 +22,8 @@ pub struct NoPlatformModule;
 #[derive(Debug, PartialEq, Eq)]
 pub struct UnwrapFailed;
 
-/// Index, journal, and one container each have their own data key.
-/// This slice only wraps those keys.
+/// Recovery bundle: the index, the journal, and one container each have their own data key.
+/// A vault with many containers is a [`Store`]. Passphrase recovery still wraps this bundle.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct DataKeys {
     pub index: [u8; 32],
@@ -34,11 +34,15 @@ pub struct DataKeys {
 impl DataKeys {
     pub fn generate() -> Self {
         Self {
-            index: random_bytes(),
-            journal: random_bytes(),
-            container: random_bytes(),
+            index: generate_data_key(),
+            journal: generate_data_key(),
+            container: generate_data_key(),
         }
     }
+}
+
+pub fn generate_data_key() -> [u8; 32] {
+    random_bytes()
 }
 
 /// Nonce and ciphertext of one 32-byte data key. The wrapping secret is not stored.
@@ -183,6 +187,13 @@ pub fn rewrap_with_passphrase(
     Ok(wrap_data_keys(module, &keys))
 }
 
+mod store;
+
+pub use store::{
+    open_body, open_index, open_journal, open_release, seal_store, Container, ContainerId,
+    OpenError, OpenedContainer, SealedBody, SealedContainer, SealedStore, Store,
+};
+
 fn random_bytes() -> [u8; 32] {
     let mut bytes = [0u8; 32];
     OsRng.fill_bytes(&mut bytes);
@@ -196,26 +207,45 @@ fn hkdf_sha256(ikm: &[u8], info: &[u8]) -> [u8; 32] {
     okm
 }
 
-fn seal(key: &[u8; 32], data_key: &[u8; 32]) -> DataKeyWrap {
+pub(crate) struct SealedBytes {
+    pub nonce: [u8; 12],
+    pub ciphertext: Vec<u8>,
+}
+
+pub(crate) fn seal_bytes(key: &[u8; 32], plaintext: &[u8]) -> SealedBytes {
     let mut nonce = [0u8; 12];
     OsRng.fill_bytes(&mut nonce);
     let cipher = ChaCha20Poly1305::new(Key::from_slice(key));
     let ciphertext = cipher
-        .encrypt(Nonce::from_slice(&nonce), data_key.as_slice())
-        .expect("data-key seal");
+        .encrypt(Nonce::from_slice(&nonce), plaintext)
+        .expect("seal");
+    SealedBytes { nonce, ciphertext }
+}
+
+pub(crate) fn open_bytes(
+    key: &[u8; 32],
+    nonce: &[u8; 12],
+    ciphertext: &[u8],
+) -> Result<Vec<u8>, UnwrapFailed> {
+    let cipher = ChaCha20Poly1305::new(Key::from_slice(key));
+    cipher
+        .decrypt(Nonce::from_slice(nonce), ciphertext)
+        .map_err(|_| UnwrapFailed)
+}
+
+fn seal(key: &[u8; 32], data_key: &[u8; 32]) -> DataKeyWrap {
+    let sealed = seal_bytes(key, data_key);
     DataKeyWrap {
-        nonce,
-        ciphertext: ciphertext
+        nonce: sealed.nonce,
+        ciphertext: sealed
+            .ciphertext
             .try_into()
             .expect("ChaCha20-Poly1305 adds a 16-byte tag"),
     }
 }
 
 fn open(key: &[u8; 32], wrap: &DataKeyWrap) -> Result<[u8; 32], UnwrapFailed> {
-    let cipher = ChaCha20Poly1305::new(Key::from_slice(key));
-    let plain = cipher
-        .decrypt(Nonce::from_slice(&wrap.nonce), wrap.ciphertext.as_slice())
-        .map_err(|_| UnwrapFailed)?;
+    let plain = open_bytes(key, &wrap.nonce, &wrap.ciphertext)?;
     plain.try_into().map_err(|_| UnwrapFailed)
 }
 
