@@ -201,7 +201,7 @@
 - зависит: S05.
 - машина: NAS.
 - приёмка: `cargo test -p clavis-registry --test snapshot_publish`
-- состояние: открыт.
+- состояние: закрыт.
 
 ### S22 — Предикаты
 

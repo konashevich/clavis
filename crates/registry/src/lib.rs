@@ -82,6 +82,77 @@ pub fn classify(
     Category::Unregistered
 }
 
+/// Holder fetch for the current registry snapshot.
+/// [`snapshot_fetch_request`] takes no key argument, so the publisher never learns which key was just encountered.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct SnapshotFetchRequest;
+
+pub const SNAPSHOT_FETCH_REQUEST_BYTES: &[u8] = b"clavis-snapshot-fetch-v1";
+
+pub fn snapshot_fetch_request() -> SnapshotFetchRequest {
+    SnapshotFetchRequest
+}
+
+pub fn serialize_snapshot_fetch_request(request: &SnapshotFetchRequest) -> Vec<u8> {
+    match request {
+        SnapshotFetchRequest => SNAPSHOT_FETCH_REQUEST_BYTES.to_vec(),
+    }
+}
+
+/// Serves one signed snapshot. A later [`SnapshotPublisher::publish`] replaces it entirely.
+#[derive(Clone, Debug, Default)]
+pub struct SnapshotPublisher {
+    current: Option<Snapshot>,
+}
+
+impl SnapshotPublisher {
+    pub fn new() -> Self {
+        Self { current: None }
+    }
+
+    /// Publish this snapshot as the whole directory and return those bytes.
+    pub fn publish(&mut self, snapshot: Snapshot) -> Vec<u8> {
+        let bytes = serialize_published_snapshot(&snapshot);
+        self.current = Some(snapshot);
+        bytes
+    }
+
+    pub fn current(&self) -> Option<&Snapshot> {
+        self.current.as_ref()
+    }
+
+    /// Answer a holder fetch with the entire current snapshot.
+    pub fn answer(&self, request: &SnapshotFetchRequest) -> Option<Vec<u8>> {
+        match request {
+            SnapshotFetchRequest => self.current.as_ref().map(serialize_published_snapshot),
+        }
+    }
+}
+
+pub fn serialize_published_snapshot(snapshot: &Snapshot) -> Vec<u8> {
+    let mut bytes = b"clavis-published-snapshot-v1".to_vec();
+    bytes.extend_from_slice(&snapshot.expires_unix.to_be_bytes());
+    bytes.extend_from_slice(snapshot.publisher_did.as_bytes());
+    bytes.push(0);
+    bytes.extend_from_slice(&snapshot.signature);
+    for operator in &snapshot.operators {
+        bytes.extend_from_slice(operator.name.as_bytes());
+        bytes.push(0);
+        bytes.extend_from_slice(operator.category.as_bytes());
+        bytes.push(0);
+        for kind in &operator.kinds {
+            bytes.extend_from_slice(kind.as_bytes());
+            bytes.push(0);
+        }
+        for key in &operator.keys {
+            bytes.extend_from_slice(key.as_bytes());
+            bytes.push(0);
+        }
+        bytes.push(0xff);
+    }
+    bytes
+}
+
 fn snapshot_message(operators: &[Operator], expires_unix: u64) -> Vec<u8> {
     let mut message = b"clavis-snapshot-v1".to_vec();
     message.extend_from_slice(&expires_unix.to_be_bytes());
