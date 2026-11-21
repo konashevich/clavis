@@ -6,7 +6,9 @@ use x25519_dalek::{PublicKey, StaticSecret};
 
 fn contains(haystack: &[u8], needle: &str) -> bool {
     let needle = needle.as_bytes();
-    haystack.windows(needle.len()).any(|window| window == needle)
+    haystack
+        .windows(needle.len())
+        .any(|window| window == needle)
 }
 
 #[test]
@@ -39,6 +41,12 @@ fn freshness_one_field_encrypted_to_verifier() {
         nonce,
         purpose: "данное обращение".into(),
         retention: "хранить до даты".into(),
+        form: clavis_protocol::RequestForm::Static,
+        expires_at: None,
+        kinds: Vec::new(),
+        portrait: false,
+        document_number: false,
+        signature: Vec::new(),
     };
 
     let sealed = release(&claims, &request, &holder).unwrap();

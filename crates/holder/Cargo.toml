@@ -7,8 +7,17 @@ publish.workspace = true
 
 [dependencies]
 clavis-protocol = { workspace = true }
+clavis-registry = { path = "../registry" }
 ed25519-dalek = { workspace = true }
 chacha20poly1305 = { workspace = true }
 sha2 = { workspace = true }
 hkdf = { workspace = true }
+rand = { workspace = true }
+
+[dev-dependencies]
+clavis-protocol = { workspace = true }
+clavis-registry = { path = "../registry" }
+clavis-verifier = { path = "../verifier" }
+ed25519-dalek = { workspace = true }
+x25519-dalek = { workspace = true }
 rand = { workspace = true }

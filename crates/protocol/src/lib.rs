@@ -61,6 +61,26 @@ pub struct Claim {
     pub value: String,
 }
 
+/// Static description, or a dynamic request bound to one session.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum RequestForm {
+    #[default]
+    Static,
+    Dynamic,
+}
+
+/// Outcome of [`verify_request_signature`].
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RequestSignature {
+    /// Signature is valid and covers `verifier_x25519`.
+    Covered,
+    /// Signature is valid for the request and omits the recipient key.
+    RecipientNotCovered,
+    /// Signature does not verify.
+    Broken,
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Request {
     pub id: String,
@@ -70,6 +90,99 @@ pub struct Request {
     pub nonce: [u8; 32],
     pub purpose: String,
     pub retention: String,
+    /// Static description or a dynamic session request.
+    #[serde(default)]
+    pub form: RequestForm,
+    /// Unix seconds. Callers apply their own clock skew.
+    #[serde(default)]
+    pub expires_at: Option<i64>,
+    /// Kinds the operator asks for. Compared with the registry kind list.
+    #[serde(default)]
+    pub kinds: Vec<String>,
+    /// Portrait is asked for an in-person check.
+    #[serde(default)]
+    pub portrait: bool,
+    /// Document number is asked.
+    #[serde(default)]
+    pub document_number: bool,
+    /// Ed25519 signature by `verifier_did` over [`request_signing_bytes`].
+    #[serde(default)]
+    pub signature: Vec<u8>,
+}
+
+/// Bytes the verifier signs. `cover_recipient` includes `verifier_x25519`,
+/// the key the presentation is encrypted to.
+pub fn request_signing_bytes(request: &Request, cover_recipient: bool) -> Vec<u8> {
+    let mut out = b"clavis-request-v1".to_vec();
+    push_str(&mut out, &request.id);
+    push_str(&mut out, &request.verifier_did);
+    if cover_recipient {
+        out.push(1);
+        out.extend_from_slice(&request.verifier_x25519);
+    } else {
+        out.push(0);
+    }
+    out.extend_from_slice(&(request.fields.len() as u64).to_be_bytes());
+    for field in &request.fields {
+        push_str(&mut out, field);
+    }
+    out.extend_from_slice(&request.nonce);
+    push_str(&mut out, &request.purpose);
+    push_str(&mut out, &request.retention);
+    out.push(match request.form {
+        RequestForm::Static => 0,
+        RequestForm::Dynamic => 1,
+    });
+    match request.expires_at {
+        Some(expiry) => {
+            out.push(1);
+            out.extend_from_slice(&expiry.to_be_bytes());
+        }
+        None => out.push(0),
+    }
+    out.extend_from_slice(&(request.kinds.len() as u64).to_be_bytes());
+    for kind in &request.kinds {
+        push_str(&mut out, kind);
+    }
+    out.push(u8::from(request.portrait));
+    out.push(u8::from(request.document_number));
+    out
+}
+
+pub fn sign_request(request: &mut Request, signer: &SigningKey, cover_recipient: bool) {
+    let message = request_signing_bytes(request, cover_recipient);
+    request.signature = signer.sign(&message).to_bytes().to_vec();
+}
+
+pub fn verify_request_signature(request: &Request) -> RequestSignature {
+    let Ok(public_key) = parse_did_key_ed25519(&request.verifier_did) else {
+        return RequestSignature::Broken;
+    };
+    let Ok(verifying) = VerifyingKey::from_bytes(&public_key) else {
+        return RequestSignature::Broken;
+    };
+    let Ok(signature) = Signature::from_slice(&request.signature) else {
+        return RequestSignature::Broken;
+    };
+    if verifying
+        .verify(&request_signing_bytes(request, true), &signature)
+        .is_ok()
+    {
+        return RequestSignature::Covered;
+    }
+    if verifying
+        .verify(&request_signing_bytes(request, false), &signature)
+        .is_ok()
+    {
+        return RequestSignature::RecipientNotCovered;
+    }
+    RequestSignature::Broken
+}
+
+fn push_str(out: &mut Vec<u8>, value: &str) {
+    let bytes = value.as_bytes();
+    out.extend_from_slice(&(bytes.len() as u64).to_be_bytes());
+    out.extend_from_slice(bytes);
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -350,7 +463,10 @@ pub fn open(
     serde_json::from_slice(&plaintext).map_err(|_| Error::Encoding)
 }
 
-fn seal(presentation: &Presentation, verifier_x25519: &[u8; 32]) -> Result<SealedPresentation, Error> {
+fn seal(
+    presentation: &Presentation,
+    verifier_x25519: &[u8; 32],
+) -> Result<SealedPresentation, Error> {
     let verifier_public = PublicKey::from(*verifier_x25519);
     let ephemeral = EphemeralSecret::random_from_rng(OsRng);
     let ephemeral_public = PublicKey::from(&ephemeral);
@@ -490,9 +606,18 @@ mod tests {
     #[test]
     fn merkle_promotes_odd_leaf() {
         let claims = vec![
-            Claim { path: "a".into(), value: "1".into() },
-            Claim { path: "b".into(), value: "2".into() },
-            Claim { path: "c".into(), value: "3".into() },
+            Claim {
+                path: "a".into(),
+                value: "1".into(),
+            },
+            Claim {
+                path: "b".into(),
+                value: "2".into(),
+            },
+            Claim {
+                path: "c".into(),
+                value: "3".into(),
+            },
         ];
         let tree = MerkleTree::build(&claims).unwrap();
         for (index, claim) in ["a", "b", "c"].into_iter().enumerate() {
@@ -507,5 +632,46 @@ mod tests {
         assert_ne!(Origin::IssuerSigned.label(), Origin::SelfAsserted.label());
         assert_eq!(Origin::SelfAsserted.label(), "внесено человеком");
         assert_eq!(Origin::IssuerSigned.label(), "подписано эмитентом");
+    }
+
+    #[test]
+    fn request_new_fields_default_when_absent() {
+        let request = Request {
+            id: "req-defaults".into(),
+            verifier_did: "did:key:z".into(),
+            verifier_x25519: [7u8; 32],
+            fields: vec!["Patient.name".into()],
+            nonce: [3u8; 32],
+            purpose: "приём".into(),
+            retention: "не хранить".into(),
+            form: RequestForm::Dynamic,
+            expires_at: Some(10),
+            kinds: vec!["medical".into()],
+            portrait: true,
+            document_number: true,
+            signature: vec![1, 2, 3],
+        };
+        let mut value = serde_json::to_value(&request).unwrap();
+        let obj = value.as_object_mut().unwrap();
+        for key in [
+            "form",
+            "expires_at",
+            "kinds",
+            "portrait",
+            "document_number",
+            "signature",
+        ] {
+            obj.remove(key);
+        }
+        let restored: Request = serde_json::from_value(value).unwrap();
+        assert_eq!(restored.id, request.id);
+        assert_eq!(restored.verifier_x25519, request.verifier_x25519);
+        assert_eq!(restored.fields, request.fields);
+        assert_eq!(restored.form, RequestForm::Static);
+        assert_eq!(restored.expires_at, None);
+        assert!(restored.kinds.is_empty());
+        assert!(!restored.portrait);
+        assert!(!restored.document_number);
+        assert!(restored.signature.is_empty());
     }
 }

@@ -1,5 +1,5 @@
 use clavis_protocol::{release_carrying, verify_inclusion, CarriedIssuer, Claim, Request};
-use clavis_verifier::{accept, IssuerAnchor};
+use clavis_verifier::{accept, IssuerAnchor, OpenRequests};
 use ed25519_dalek::SigningKey;
 use rand::rngs::OsRng;
 use rand::RngCore;
@@ -31,6 +31,18 @@ fn claims() -> Vec<Claim> {
             value: WITHHELD.into(),
         },
     ]
+}
+
+fn accept_once(
+    sealed: &clavis_protocol::SealedPresentation,
+    verifier: &StaticSecret,
+    anchor: &IssuerAnchor,
+    nonce: &[u8; 32],
+    now: i64,
+) -> Result<clavis_verifier::Accepted, clavis_verifier::Error> {
+    let mut open = OpenRequests::new();
+    open.insert(*nonce, EXPIRES_AT);
+    accept(sealed, verifier, anchor, nonce, now, &mut open)
 }
 
 fn carried(issued: &clavis_issuer::Issued, kind: &str) -> CarriedIssuer {
@@ -74,6 +86,12 @@ fn medical_accept() {
         nonce,
         purpose: "приём в поликлинике".into(),
         retention: "данное обращение".into(),
+        form: clavis_protocol::RequestForm::Dynamic,
+        expires_at: Some(EXPIRES_AT),
+        kinds: vec!["medical".into()],
+        portrait: false,
+        document_number: false,
+        signature: Vec::new(),
     };
     let anchor = IssuerAnchor {
         name: CLINIC.into(),
@@ -93,7 +111,7 @@ fn medical_accept() {
     assert!(!contains(&sealed.ciphertext, "внесено человеком"));
     assert!(!contains(&sealed.ciphertext, "подписано эмитентом"));
 
-    let accepted = accept(&sealed, &verifier, &anchor, &nonce, EXPIRES_AT + 120).unwrap();
+    let accepted = accept_once(&sealed, &verifier, &anchor, &nonce, EXPIRES_AT + 120).unwrap();
     assert_eq!(accepted.presentation.nonce, nonce);
     assert_eq!(accepted.presentation.request_id, request.id);
     assert_eq!(accepted.presentation.root, issued.root);
@@ -124,7 +142,8 @@ fn medical_accept() {
 
     let mut renamed = anchor.clone();
     renamed.name = "Другая поликлиника".into();
-    let renamed_accept = accept(&sealed, &verifier, &renamed, &nonce, EXPIRES_AT + 120).unwrap();
+    let renamed_accept =
+        accept_once(&sealed, &verifier, &renamed, &nonce, EXPIRES_AT + 120).unwrap();
     assert_eq!(renamed_accept.origin, "подпись эмитента принята");
     assert_eq!(
         renamed_accept.anchor_name.as_deref(),
@@ -133,18 +152,18 @@ fn medical_accept() {
 
     let other = StaticSecret::random_from_rng(OsRng);
     assert_eq!(
-        accept(&sealed, &other, &anchor, &nonce, EXPIRES_AT + 120).unwrap_err(),
+        accept_once(&sealed, &other, &anchor, &nonce, EXPIRES_AT + 120).unwrap_err(),
         clavis_verifier::Error::Open(clavis_protocol::Error::Decrypt)
     );
 
     let mut wrong_nonce = nonce;
     wrong_nonce[0] ^= 0xff;
     assert_eq!(
-        accept(&sealed, &verifier, &anchor, &wrong_nonce, EXPIRES_AT + 120).unwrap_err(),
+        accept_once(&sealed, &verifier, &anchor, &wrong_nonce, EXPIRES_AT + 120).unwrap_err(),
         clavis_verifier::Error::Freshness
     );
     assert_eq!(
-        accept(&sealed, &verifier, &anchor, &nonce, EXPIRES_AT + 121).unwrap_err(),
+        accept_once(&sealed, &verifier, &anchor, &nonce, EXPIRES_AT + 121).unwrap_err(),
         clavis_verifier::Error::Freshness
     );
 
@@ -161,7 +180,7 @@ fn medical_accept() {
         EXPIRES_AT,
     )
     .unwrap();
-    let foreign_accepted = accept(
+    let foreign_accepted = accept_once(
         &foreign_sealed,
         &verifier,
         &anchor,
@@ -179,7 +198,8 @@ fn medical_accept() {
     let other_kind = carried(&issued, "Observation");
     let kind_sealed =
         release_carrying(&claims(), &request, &holder, Some(&other_kind), EXPIRES_AT).unwrap();
-    let kind_accepted = accept(&kind_sealed, &verifier, &anchor, &nonce, EXPIRES_AT + 120).unwrap();
+    let kind_accepted =
+        accept_once(&kind_sealed, &verifier, &anchor, &nonce, EXPIRES_AT + 120).unwrap();
     assert_eq!(kind_accepted.origin, "подпись без признанного эмитента");
     assert!(kind_accepted.anchor_name.is_none());
 
@@ -187,7 +207,8 @@ fn medical_accept() {
     let self_on_wire = serde_json::to_vec(&self_sealed).unwrap();
     assert!(!contains(&self_on_wire, WITHHELD));
     assert!(!contains(&self_sealed.ciphertext, WITHHELD));
-    let self_accepted = accept(&self_sealed, &verifier, &anchor, &nonce, EXPIRES_AT + 120).unwrap();
+    let self_accepted =
+        accept_once(&self_sealed, &verifier, &anchor, &nonce, EXPIRES_AT + 120).unwrap();
     assert_eq!(self_accepted.origin, "внесено человеком");
     assert!(self_accepted.anchor_name.is_none());
     assert_eq!(self_accepted.presentation.nonce, nonce);

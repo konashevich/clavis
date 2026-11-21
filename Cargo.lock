@@ -103,10 +103,13 @@ version = "0.1.0"
 dependencies = [
  "chacha20poly1305",
  "clavis-protocol",
+ "clavis-registry",
+ "clavis-verifier",
  "ed25519-dalek",
  "hkdf",
  "rand",
  "sha2",
+ "x25519-dalek",
 ]
 
 [[package]]
