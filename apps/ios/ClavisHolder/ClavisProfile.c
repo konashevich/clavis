@@ -1,12 +1,6 @@
 #include "ClavisProfile.h"
 
 /*
- * Weak stand-in used until the Rust core supplies this symbol.
- * Returns -1 and writes nothing. A strong definition replaces it at link time.
+ * The declaration in ClavisProfile.h is what Swift calls.
+ * The Rust static library defines clavis_profile. This file does not.
  */
-__attribute__((weak))
-int32_t clavis_profile(uint8_t *out, size_t cap) {
-    (void)out;
-    (void)cap;
-    return -1;
-}
