@@ -113,7 +113,7 @@
 - зависит: S03.
 - машина: NAS.
 - приёмка: `cargo test -p clavis-holder --test passphrase_rewrap`
-- состояние: открыт.
+- состояние: закрыт.
 
 ### S11 — Контейнеры
 

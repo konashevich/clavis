@@ -101,9 +101,12 @@ dependencies = [
 name = "clavis-holder"
 version = "0.1.0"
 dependencies = [
+ "chacha20poly1305",
  "clavis-protocol",
  "ed25519-dalek",
+ "hkdf",
  "rand",
+ "sha2",
 ]
 
 [[package]]
