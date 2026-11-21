@@ -115,6 +115,12 @@ version = "0.1.0"
 dependencies = [
  "clavis-holder",
  "clavis-protocol",
+ "clavis-verifier",
+ "ed25519-dalek",
+ "rand",
+ "serde",
+ "serde_json",
+ "x25519-dalek",
 ]
 
 [[package]]

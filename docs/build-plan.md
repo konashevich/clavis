@@ -89,7 +89,7 @@
 - зависит: S03, S06.
 - машина: NAS.
 - приёмка: `cargo test -p clavis-holder-linux --test tcp_release`
-- состояние: открыт.
+- состояние: закрыт.
 
 ### S08 — Согласие
 

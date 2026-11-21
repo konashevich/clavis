@@ -3,7 +3,7 @@
 
 use chacha20poly1305::aead::{Aead, KeyInit};
 use chacha20poly1305::{ChaCha20Poly1305, Key, Nonce};
-use clavis_protocol::did_key_ed25519;
+use clavis_protocol::{did_key_ed25519, Claim, Request, SealedPresentation};
 use ed25519_dalek::{Signer, SigningKey};
 use hkdf::Hkdf;
 use rand::rngs::OsRng;
@@ -133,6 +133,15 @@ impl PairwiseKey {
 
     pub fn try_export(&self) -> Result<Vec<u8>, ExportRefused> {
         Err(ExportRefused)
+    }
+
+    /// Seal one presentation with this pairwise key. The signing key stays here.
+    pub fn release(
+        &self,
+        claims: &[Claim],
+        request: &Request,
+    ) -> Result<SealedPresentation, clavis_protocol::Error> {
+        clavis_protocol::release(claims, request, &self.signing)
     }
 }
 
