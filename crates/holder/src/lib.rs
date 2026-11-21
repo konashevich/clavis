@@ -207,6 +207,7 @@ pub fn rewrap_with_passphrase(
 }
 
 mod consent;
+mod journal;
 mod store;
 
 pub use consent::{
@@ -214,6 +215,10 @@ pub use consent::{
     KIND_EDUCATION, KIND_FINANCIAL, KIND_MEDICAL, KIND_PERSONAL, KIND_PROPERTY, KIND_RESIDENTIAL,
 };
 
+pub use journal::{
+    ArrivedStatement, Journal, JournalParseError, JournalRow, StatementError, StatementKind,
+    StoredStatement,
+};
 pub use store::{
     open_body, open_index, open_journal, open_release, seal_store, Container, ContainerId,
     OpenError, OpenedContainer, SealedBody, SealedContainer, SealedStore, Store,
