@@ -12,3 +12,12 @@ path = "src/main.rs"
 [dependencies]
 clavis-holder = { workspace = true }
 clavis-protocol = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+clavis-verifier = { path = "../verifier" }
+ed25519-dalek = { workspace = true }
+x25519-dalek = { workspace = true }
+rand = { workspace = true }
+serde_json = { workspace = true }
