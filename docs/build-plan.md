@@ -81,7 +81,7 @@
 - зависит: S01, S04, S05.
 - машина: NAS.
 - приёмка: `cargo test -p clavis-verifier --test medical_accept`
-- состояние: открыт.
+- состояние: закрыт.
 
 ### S07 — Держатель Linux
 
