@@ -1,0 +1,11 @@
+[package]
+name = "clavis-holder"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+clavis-protocol = { workspace = true }
+ed25519-dalek = { workspace = true }
+rand = { workspace = true }

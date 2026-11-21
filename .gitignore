@@ -1,0 +1,10 @@
+/target
+**/*.rs.bk
+.gradle/
+**/build/
+local.properties
+apps/android/app/src/main/jniLibs/
+runs/
+*.apk
+*.aab
+.DS_Store

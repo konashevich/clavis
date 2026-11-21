@@ -1,0 +1,15 @@
+[package]
+name = "clavis-registry"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "clavis-registry"
+path = "src/main.rs"
+
+[dependencies]
+clavis-protocol = { workspace = true }
+ed25519-dalek = { workspace = true }
+rand = { workspace = true }

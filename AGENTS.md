@@ -2,6 +2,18 @@
 
 **CLAVIS** (*Cryptographic Linked Attestation & Verifiable Identity System*) is a **cross-platform** personal data vault and protocol: the user holds encrypted credentials on their device, and releases them to verifiers only after explicit, hardware-gated consent.
 
+## Operating rules
+
+Full multiplatform delivery is the current goal: one protocol, holder shells on Android, iOS, Linux, and Windows, plus a verifier, an issuer tool, and a registry snapshot publisher. The concept is `docs/clavis-whitepaper.html`. The schedule is `docs/build-plan.md`. Files under `gemini-export/canvas/` are not requirements.
+
+Machine split:
+
+- This computer (NAS, `192.168.1.114`) orchestrates, installs to the connected Android phone, and runs screen-tests. Phone work goes through `android-device-queue`. ADB is the install path, not the protocol channel.
+- Beast (`192.168.1.112`, user `beast`) runs heavy Android and Rust compiles when it answers SSH. This computer compiles only when Beast does not answer. Install only what Beast lacks, beside SDKs other projects still use. Do not move the conductor to Beast.
+- iOS builds belong on the Mac mini. Take its address from the announce share (`/home/pi/Documents/shared/hosts`). Do not invent an address. If the Mac is absent or does not answer, keep the iOS project in the repo and do not claim the build passed.
+
+Only a passing accept check merges a slice onto `main`. The dispatcher and the acceptor are specified in `docs/build-plan.md`.
+
 ## What we are building
 
 A **Holder** app (the vault) that:
@@ -45,11 +57,13 @@ Prove, in a serious domain (prefer **medical / government**, not toy “bartende
 
 | Path | Role |
 |------|------|
+| `docs/clavis-whitepaper.html` | Concept. The system. |
+| `docs/build-plan.md` | Ecosystem schedule: slices, machines, accept checks. |
 | `gemini-export/` | Export of the Gemini design chat + Canvas HTML bodies. |
-| `gemini-export/index.html` | Chronological Q&A transcript (primary narrative of decisions). |
-| `gemini-export/canvas/*.html` | Canvas artifacts extracted from that chat. |
+| `gemini-export/index.html` | Chronological Q&A transcript. Historical. |
+| `gemini-export/canvas/*.html` | Canvas artifacts. Not requirements. |
 | `notes.md`, `protocol_draft_0.1.md` | Local scratch / early protocol draft. |
-| `slides/` | Full-project slide deck work started from the same chat. |
+| `slides/` | Slide deck work started from the same chat. |
 
 ### Canvas / Gemini artifacts = **unverified drafts**
 
@@ -62,9 +76,10 @@ The owner has **not reviewed or approved** the Canvas files (or Gemini-generated
 **Source-of-truth order for agents:**
 
 1. This `AGENTS.md` and explicit owner instructions in the current chat.
-2. The **logic of the Gemini transcript** (`gemini-export/index.html` / `_raw_transcript.json`) — what the owner asked for and corrected over time.
+2. The concept, `docs/clavis-whitepaper.html`, and the schedule, `docs/build-plan.md`.
 3. Local drafts (`protocol_draft_0.1.md`, `notes.md`) as working notes only.
-4. Canvas HTML — **reference only**, always labeled mentally as *unverified draft*.
+4. The Gemini transcript (`gemini-export/index.html`) as history of how the concept was reached.
+5. Canvas HTML — **reference only**, never a requirement.
 
 When Canvas conflicts with the transcript or with the cross-platform rule above, **follow the chat corrections and this brief**.
 
