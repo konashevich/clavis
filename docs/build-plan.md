@@ -97,7 +97,7 @@
 - зависит: S05, S07.
 - машина: NAS.
 - приёмка: `cargo test -p clavis-holder --test consent_replay`
-- состояние: открыт.
+- состояние: закрыт.
 
 ### S09 — Журнал и удаление
 
@@ -105,7 +105,7 @@
 - зависит: S03, S07.
 - машина: NAS.
 - приёмка: `cargo test -p clavis-holder --test deletion_statement`
-- состояние: открыт.
+- состояние: закрыт.
 
 ### S10 — Восстановление
 
@@ -129,7 +129,7 @@
 - зависит: S03, S07.
 - машина: MyNUC `192.168.1.108` для двоичного файла, NAS для `cargo test` крейта.
 - приёмка: `cargo test -p clavis-holder-windows --test release_one_field`
-- состояние: открыт.
+- состояние: закрыт.
 
 ### S13 — Держатель Android
 
@@ -143,9 +143,9 @@
 
 - что: оболочка iOS вызывает `clavis_profile` и показывает ту же карточку согласия.
 - зависит: S03, S08.
-- машина: Mac mini из объявления на шаре. Пока записи нет, срез не считается прошедшим.
+- машина: Mac mini из объявления на шаре. В `/home/pi/Documents/shared/hosts` его нет, поэтому `xcodebuild` не запускался.
 - приёмка: `xcodebuild -project apps/ios/ClavisHolder.xcodeproj -scheme ClavisHolder -destination 'generic/platform=iOS' build`
-- состояние: открыт.
+- состояние: влит в main по приказу владельца 22 ноября 2026. Сборка устройства не выполнялась.
 
 ### S15 — Один протокол
 
